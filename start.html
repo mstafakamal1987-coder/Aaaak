@@ -1,0 +1,3486 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار المواد الاجتماعية - الصف السادس</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  // ⚠️ ضع هنا apiKey الكامل من Firebase Console
+  const firebaseConfig = {
+    apiKey: "AIzaSyA80mdDBrn0okb7TAr3mXhqWFE3YXCKu8s",
+    authDomain: "fir-console-b07d5.firebaseapp.com",
+    databaseURL: "https://fir-console-b07d5-default-rtdb.firebaseio.com",
+    projectId: "fir-console-b07d5",
+    storageBucket: "fir-console-b07d5.firebasestorage.app",
+    messagingSenderId: "421271111165",
+    appId: "1:421271111165:web:6ab54d0b7215e94b450594"
+  };
+
+  window.firebaseReady = false;
+
+  // توليد كود نتيجة فريد
+  window.generateResultCode = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  };
+
+  // localStorage fallback functions
+  function setLocalFallbacks() {
+    window.saveResultToCloud = async (data) => {
+      const code = window.generateResultCode();
+      data.resultCode = code;
+      const obj = JSON.parse(localStorage.getItem('quizResults') || '{}');
+      obj[code] = data;
+      localStorage.setItem('quizResults', JSON.stringify(obj));
+      console.warn('Saved to localStorage (Firebase unavailable)');
+      return code;
+    };
+    window.getResultByCode = async (code) => {
+      const obj = JSON.parse(localStorage.getItem('quizResults') || '{}');
+      return obj[code.toUpperCase()] || null;
+    };
+    window.getTopResults = async () => {
+      return Object.values(JSON.parse(localStorage.getItem('quizResults') || '{}'));
+    };
+  }
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    window._firebaseDb = db;
+
+    window.saveResultToCloud = async (data) => {
+      const code = window.generateResultCode();
+      data.resultCode = code;
+      await set(ref(db, 'results/' + code), data);
+      console.log('Saved to Firebase. Code:', code);
+      return code;
+    };
+
+    window.getResultByCode = async (code) => {
+      const snap = await get(ref(db, 'results/' + code.toUpperCase()));
+      return snap.exists() ? snap.val() : null;
+    };
+
+    window.getTopResults = async () => {
+      const snap = await get(ref(db, 'results'));
+      return snap.exists() ? Object.values(snap.val()) : [];
+    };
+
+    window.firebaseReady = true;
+    console.log('Firebase initialized successfully');
+  } catch(e) {
+    console.error('Firebase init error:', e);
+    setLocalFallbacks();
+  }
+</script>
+
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --gold-dark: #a07830;
+  --deep: #0d1117;
+  --deep2: #161b22;
+  --deep3: #21262d;
+  --surface: #1c2128;
+  --surface2: #252b33;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --green: #3fb950;
+  --red: #f85149;
+  --blue: #388bfd;
+  --orange: #d29922;
+  --geo-color: #2ea043;
+  --hist-color: #a371f7;
+  --civic-color: #f78166;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  background: var(--deep);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-top: 3.2rem;
+}
+
+/* ══ RETRY WRONG QUICK BAR ══ */
+.retry-quick-bar {
+  position: fixed;
+  top: 3.2rem;
+  left: 0;
+  right: 0;
+  z-index: 290;
+  display: none;
+  justify-content: center;
+  padding: 0.3rem 1rem;
+  background: linear-gradient(90deg, rgba(13,17,23,0.95), rgba(22,27,34,0.97), rgba(13,17,23,0.95));
+  border-bottom: 1px solid rgba(248,81,73,0.25);
+  backdrop-filter: blur(8px);
+  animation: slideDownBar 0.3s ease;
+}
+.retry-quick-bar.visible { display: flex; }
+@keyframes slideDownBar {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.retry-quick-btn {
+  background: linear-gradient(135deg, rgba(248,81,73,0.18), rgba(248,81,73,0.06));
+  border: 1px solid rgba(248,81,73,0.45);
+  color: #ff8080;
+  border-radius: 50px;
+  padding: 0.3rem 1.1rem;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+.retry-quick-btn:hover {
+  background: linear-gradient(135deg, rgba(248,81,73,0.3), rgba(248,81,73,0.12));
+  border-color: var(--red);
+  color: var(--red);
+  transform: scale(1.03);
+}
+.retry-quick-badge {
+  background: var(--red);
+  color: white;
+  border-radius: 50px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+/* ── Animated background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(163,113,247,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(13,17,23,0) 0%, rgba(13,17,23,0.8) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--deep2); }
+::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 3px; }
+
+/* ══════════════════════════════════════
+   SCREENS
+══════════════════════════════════════ */
+.screen { display: none; position: relative; z-index: 1; animation: fadeIn 0.4s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ══════════════════════════════════════
+   HOME SCREEN
+══════════════════════════════════════ */
+#homeScreen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo-area {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.logo-badge {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 0 40px rgba(201,168,76,0.4), 0 0 80px rgba(201,168,76,0.15);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(201,168,76,0.4), 0 0 80px rgba(201,168,76,0.15); }
+  50% { box-shadow: 0 0 60px rgba(201,168,76,0.6), 0 0 120px rgba(201,168,76,0.25); }
+}
+
+.home-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+}
+
+.home-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+}
+
+.stats-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 50px;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stat-chip span { color: var(--gold); font-weight: 700; }
+
+.section-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 2rem;
+}
+
+.section-btn {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 14px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: right;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.section-btn.geo::before { background: linear-gradient(135deg, rgba(46,160,67,0.15), transparent); }
+.section-btn.hist::before { background: linear-gradient(135deg, rgba(163,113,247,0.15), transparent); }
+.section-btn.civic::before { background: linear-gradient(135deg, rgba(247,129,102,0.15), transparent); }
+.section-btn.all::before { background: linear-gradient(135deg, rgba(201,168,76,0.2), transparent); }
+
+.section-btn:hover::before { opacity: 1; }
+.section-btn:hover { border-color: var(--gold-dark); transform: translateX(-3px); }
+
+.section-btn.selected {
+  border-color: var(--gold);
+  background: var(--surface2);
+}
+
+.section-btn.selected::before { opacity: 1; }
+
+.sec-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.sec-icon.geo { background: rgba(46,160,67,0.2); }
+.sec-icon.hist { background: rgba(163,113,247,0.2); }
+.sec-icon.civic { background: rgba(247,129,102,0.2); }
+.sec-icon.all { background: rgba(201,168,76,0.2); }
+
+.sec-text { flex: 1; }
+.sec-name { font-weight: 700; font-size: 1rem; color: var(--text); }
+.sec-count { font-size: 0.8rem; color: var(--text-muted); }
+
+.sec-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--deep3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  transition: all 0.2s;
+}
+
+.section-btn.selected .sec-check {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--deep);
+}
+
+.name-input-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 1.5rem;
+}
+
+.name-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 12px;
+  padding: 0.9rem 1.2rem;
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  text-align: right;
+}
+
+.name-input:focus { border-color: var(--gold); }
+.name-input::placeholder { color: var(--text-muted); }
+
+.start-btn {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--deep);
+  border: none;
+  border-radius: 14px;
+  padding: 1rem 3rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+  width: 100%;
+  max-width: 480px;
+}
+
+.start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.45);
+}
+
+.start-btn:active { transform: translateY(0); }
+
+/* ══════════════════════════════════════
+   QUIZ SCREEN
+══════════════════════════════════════ */
+#quizScreen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Header */
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.quiz-progress-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.quiz-progress-info strong { color: var(--gold); font-size: 1.1rem; }
+
+.quiz-section-tag {
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tag-geo { background: rgba(46,160,67,0.2); color: var(--geo-color); }
+.tag-hist { background: rgba(163,113,247,0.2); color: var(--hist-color); }
+.tag-civic { background: rgba(247,129,102,0.2); color: var(--civic-color); }
+
+.quit-btn {
+  background: transparent;
+  border: 1px solid var(--deep3);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.quit-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* Progress bar */
+.progress-track {
+  height: 6px;
+  background: var(--deep3);
+  border-radius: 3px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Question card */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.question-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.q-number {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.q-number::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.q-text {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-weight: 600;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+/* Options */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 500px) {
+  .options-grid { grid-template-columns: 1fr; }
+}
+
+.option-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--deep3);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: right;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.option-btn:hover:not(:disabled) {
+  border-color: var(--gold-dark);
+  background: var(--surface2);
+  transform: translateX(-2px);
+}
+
+.option-label {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--deep3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  color: var(--text-muted);
+}
+
+.option-btn:hover:not(:disabled) .option-label {
+  background: var(--gold-dark);
+  color: var(--deep);
+}
+
+.option-btn.selected-correct {
+  border-color: var(--green);
+  background: rgba(63,185,80,0.1);
+  animation: correctPop 0.4s ease;
+}
+
+.option-btn.selected-correct .option-label {
+  background: var(--green);
+  color: white;
+}
+
+.option-btn.selected-wrong {
+  border-color: var(--red);
+  background: rgba(248,81,73,0.1);
+  animation: shake 0.4s ease;
+}
+
+.option-btn.selected-wrong .option-label {
+  background: var(--red);
+  color: white;
+}
+
+.option-btn.show-correct {
+  border-color: var(--green);
+  background: rgba(63,185,80,0.08);
+}
+
+.option-btn.show-correct .option-label {
+  background: var(--green);
+  color: white;
+}
+
+.option-btn:disabled { cursor: default; }
+
+@keyframes correctPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* Feedback */
+.feedback-box {
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+  display: none;
+  align-items: center;
+  gap: 0.8rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.feedback-box.show { display: flex; }
+.feedback-icon { font-size: 1.5rem; flex-shrink: 0; }
+.feedback-text { font-size: 0.9rem; line-height: 1.5; }
+.feedback-text strong { color: var(--gold); }
+
+/* Nav */
+.quiz-nav {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: space-between;
+}
+
+.nav-btn {
+  flex: 1;
+  padding: 0.9rem;
+  border-radius: 12px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.nav-btn.prev {
+  background: var(--surface2);
+  color: var(--text-muted);
+  border: 1px solid var(--deep3);
+}
+
+.nav-btn.prev:hover { color: var(--text); border-color: var(--text-muted); }
+
+.nav-btn.next {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--deep);
+  box-shadow: 0 4px 15px rgba(201,168,76,0.25);
+}
+
+.nav-btn.next:hover {
+  box-shadow: 0 6px 20px rgba(201,168,76,0.4);
+  transform: translateY(-1px);
+}
+
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+/* Timer */
+.timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.timer-display { color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
+.timer-display.warning { color: var(--red); animation: blink 0.5s step-end infinite; }
+@keyframes blink { 50% { opacity: 0.4; } }
+
+/* ══════════════════════════════════════
+   RESULTS SCREEN
+══════════════════════════════════════ */
+#resultsScreen {
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+.results-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.results-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.score-ring {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 1.5rem;
+  position: relative;
+}
+
+.score-ring svg { transform: rotate(-90deg); }
+
+.score-ring-track { fill: none; stroke: var(--deep3); stroke-width: 10; }
+.score-ring-fill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-pct {
+  font-size: 2rem;
+  font-weight: 900;
+  font-family: 'Cairo', sans-serif;
+  color: var(--gold);
+}
+
+.score-label { font-size: 0.7rem; color: var(--text-muted); }
+
+.grade-badge {
+  display: inline-block;
+  padding: 0.4rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.grade-A { background: rgba(63,185,80,0.2); color: var(--green); }
+.grade-B { background: rgba(201,168,76,0.2); color: var(--gold); }
+.grade-C { background: rgba(56,139,253,0.2); color: var(--blue); }
+.grade-D { background: rgba(248,81,73,0.2); color: var(--red); }
+
+.result-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.3rem; }
+.result-sub { font-size: 0.9rem; color: var(--text-muted); }
+
+.results-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.result-stat {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 14px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.result-stat-val {
+  font-size: 1.5rem;
+  font-weight: 900;
+  font-family: 'Cairo', sans-serif;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.result-stat-val.c-green { color: var(--green); }
+.result-stat-val.c-red { color: var(--red); }
+.result-stat-val.c-gold { color: var(--gold); }
+.result-stat-lbl { font-size: 0.75rem; color: var(--text-muted); }
+
+/* Section scores */
+.section-scores {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-score-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.sec-score-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.sec-score-name { font-size: 0.9rem; width: 130px; flex-shrink: 0; }
+.sec-score-bar-track { flex: 1; height: 8px; background: var(--deep3); border-radius: 4px; overflow: hidden; }
+.sec-score-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+.sec-score-pct { font-size: 0.8rem; font-weight: 700; width: 40px; text-align: left; }
+
+/* Review */
+.review-section {
+  margin-bottom: 1.5rem;
+}
+
+.review-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.review-item {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  border-right: 3px solid transparent;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.review-item:hover { background: var(--surface2); }
+.review-item.correct { border-color: var(--green); }
+.review-item.wrong { border-color: var(--red); }
+
+.review-q { font-weight: 600; margin-bottom: 0.3rem; color: var(--text); }
+.review-your-answer { color: var(--red); font-size: 0.8rem; }
+.review-correct-answer { color: var(--green); font-size: 0.8rem; }
+
+/* Leaderboard */
+.leaderboard {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.lb-title {
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--deep3);
+  font-size: 0.85rem;
+}
+
+.lb-item:last-child { border-bottom: none; }
+.lb-rank { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
+.rank-1 { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: var(--deep); }
+.rank-2 { background: var(--surface2); color: #c0c0c0; }
+.rank-3 { background: var(--surface2); color: #cd7f32; }
+.rank-other { background: var(--deep3); color: var(--text-muted); }
+.lb-name { flex: 1; }
+.lb-score { font-weight: 700; color: var(--gold); }
+.lb-section { font-size: 0.7rem; color: var(--text-muted); }
+
+/* Action buttons */
+.result-actions {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.9rem;
+  border-radius: 12px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  text-align: center;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--deep);
+}
+
+.action-btn.primary:hover { box-shadow: 0 4px 20px rgba(201,168,76,0.4); transform: translateY(-1px); }
+
+.action-btn.secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--deep3);
+}
+
+.action-btn.secondary:hover { border-color: var(--gold-dark); }
+
+/* ── Saving overlay ── */
+.save-overlay {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--gold-dark);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  font-size: 0.85rem;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 100;
+  animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards;
+}
+
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(20px); } }
+
+/* Tooltip on hover for wrong answers */
+.review-item-expanded {
+  display: none;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--deep3);
+}
+
+.review-item.open .review-item-expanded { display: block; }
+
+/* ── Confetti ── */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confettiFall 3s ease-in forwards;
+  z-index: 200;
+  pointer-events: none;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Loading spinner */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--deep3);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Firebase badge */
+.cloud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.cloud-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+/* ══ يوسف البطل — Hero Greeting ══ */
+.hero-greeting-wrap {
+  margin: 0.6rem auto 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.hero-greeting {
+  font-family: 'Cairo', sans-serif;
+  font-size: clamp(1.3rem, 4.5vw, 2rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #fff8e1, var(--gold-light), var(--gold), var(--gold-dark), var(--gold-light));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 1rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.hero-stars {
+  font-size: 0.9rem;
+  color: var(--gold);
+  letter-spacing: 0.5rem;
+  opacity: 0.8;
+  animation: twinkle 2s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  from { opacity: 0.5; transform: scale(0.95); }
+  to   { opacity: 1;   transform: scale(1.05); }
+}
+
+/* ══ يوسف البطل — Name Badge ══ */
+.hero-name-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06));
+  border: 1.5px solid var(--gold-dark);
+  border-radius: 50px;
+  padding: 0.45rem 1.4rem;
+  margin: 0.4rem auto 0.9rem;
+  box-shadow: 0 0 18px rgba(201,168,76,0.25), inset 0 0 12px rgba(201,168,76,0.05);
+  animation: badgeGlow 3s ease-in-out infinite;
+}
+
+@keyframes badgeGlow {
+  0%, 100% { box-shadow: 0 0 18px rgba(201,168,76,0.25); }
+  50%       { box-shadow: 0 0 32px rgba(201,168,76,0.45); }
+}
+
+.hero-name-text {
+  font-family: 'Cairo', sans-serif;
+  font-size: clamp(1rem, 3.5vw, 1.35rem);
+  font-weight: 900;
+  color: var(--gold-light);
+  letter-spacing: 0.05em;
+}
+
+.hero-crown {
+  font-size: 1.1rem;
+  animation: crownBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes crownBounce {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50%       { transform: translateY(-4px) rotate(5deg); }
+}
+
+/* ══ كود النتيجة ══ */
+.result-code-box {
+  background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+  border: 2px dashed var(--gold-dark);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  margin: 1rem auto;
+  max-width: 500px;
+  text-align: center;
+}
+
+.result-code-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.result-code-value {
+  font-family: 'Courier New', monospace;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: var(--gold-light);
+  text-shadow: 0 0 20px rgba(201,168,76,0.4);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.result-code-value:active { transform: scale(0.95); }
+
+.result-code-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+
+/* ══ عرض نتيجة بالكود (شاشة منفصلة) ══ */
+#lookupScreen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.lookup-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+}
+
+.lookup-input-wrap {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+}
+
+.lookup-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--gold-dark);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  font-size: 1.2rem;
+  letter-spacing: 0.15em;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.lookup-input:focus { border-color: var(--gold); }
+
+.lookup-btn {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--deep);
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 800;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+#lookupResult { width: 100%; max-width: 560px; }
+
+/* ══ عرض جميع الأسئلة (صح / خطأ / لم يجب) ══ */
+.full-review-section {
+  max-width: 700px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+}
+
+.full-review-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qa-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.qa-tab {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 50px;
+  padding: 0.35rem 1rem;
+  font-size: 0.82rem;
+  font-family: 'Tajawal', sans-serif;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.qa-tab.active { color: var(--deep); font-weight: 700; }
+.qa-tab.tab-all.active { background: var(--gold); border-color: var(--gold); }
+.qa-tab.tab-correct.active { background: var(--green); border-color: var(--green); }
+.qa-tab.tab-wrong.active { background: var(--red); border-color: var(--red); }
+.qa-tab.tab-skip.active { background: var(--text-muted); border-color: var(--text-muted); }
+
+.qa-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.qa-item {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.qa-item.qa-correct { border-right: 3px solid var(--green); }
+.qa-item.qa-wrong   { border-right: 3px solid var(--red); }
+.qa-item.qa-skip    { border-right: 3px solid var(--text-muted); }
+
+.qa-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.qa-num {
+  font-size: 0.72rem;
+  background: var(--deep3);
+  border-radius: 6px;
+  padding: 0.15rem 0.45rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.qa-q-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  line-height: 1.5;
+}
+
+.qa-status-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.qa-details {
+  display: none;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--deep3);
+  font-size: 0.83rem;
+  line-height: 1.7;
+}
+
+.qa-item.open .qa-details { display: block; }
+
+.qa-your-ans { color: var(--red); }
+.qa-your-ans.correct { color: var(--green); }
+.qa-correct-ans { color: var(--green); font-weight: 700; }
+.qa-skipped-note { color: var(--text-muted); font-style: italic; }
+
+/* ══ KHATA POPUP ══ */
+#khataPopup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: none;
+  animation: ahsantIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+#khataPopup.khata-hide {
+  animation: ahsantOut 0.35s ease forwards;
+}
+
+.khata-inner {
+  background: linear-gradient(135deg, #2a1a1a, #1f0d0d);
+  border: 2px solid var(--red);
+  border-radius: 28px;
+  padding: 2rem 3.5rem;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(248,81,73,0.5), 0 0 120px rgba(248,81,73,0.2);
+  animation: shakePopup 0.4s ease 0.1s both;
+}
+
+.khata-icon {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.khata-text {
+  font-family: 'Cairo', sans-serif;
+  font-size: clamp(3rem, 10vw, 5rem);
+  font-weight: 900;
+  color: var(--red);
+  line-height: 1;
+  text-shadow: 0 0 30px rgba(248,81,73,0.8);
+  margin-bottom: 0.4rem;
+}
+
+.khata-sub {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  max-width: 260px;
+  line-height: 1.5;
+}
+
+@keyframes shakePopup {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* ══ AHSANT POPUP ══ */
+#ahsantPopup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: none;
+  animation: ahsantIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+#ahsantPopup.ahsant-hide {
+  animation: ahsantOut 0.35s ease forwards;
+}
+
+.ahsant-inner {
+  background: linear-gradient(135deg, #1a2a1a, #0d1f0d);
+  border: 2px solid var(--green);
+  border-radius: 28px;
+  padding: 2rem 3.5rem;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(63,185,80,0.5), 0 0 120px rgba(63,185,80,0.2);
+}
+
+.ahsant-stars {
+  font-size: 1.8rem;
+  margin-bottom: 0.4rem;
+  animation: starPop 0.4s ease 0.1s both;
+}
+
+.ahsant-text {
+  font-family: 'Cairo', sans-serif;
+  font-size: clamp(3rem, 10vw, 5rem);
+  font-weight: 900;
+  color: var(--green);
+  line-height: 1;
+  text-shadow: 0 0 30px rgba(63,185,80,0.8);
+  margin-bottom: 0.3rem;
+}
+
+.ahsant-sub {
+  font-size: 1.1rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+@keyframes ahsantIn {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ahsantOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.15); }
+}
+
+@keyframes starPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+#resumeBanner {
+  display: none;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.4s ease;
+}
+
+.resume-card {
+  background: linear-gradient(135deg, rgba(56,139,253,0.15), rgba(56,139,253,0.05));
+  border: 1.5px solid rgba(56,139,253,0.5);
+  border-radius: 16px;
+  padding: 1rem 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: right;
+}
+
+.resume-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.resume-info { flex: 1; }
+
+.resume-title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--blue);
+  margin-bottom: 0.2rem;
+}
+
+.resume-detail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.resume-progress-bar {
+  height: 5px;
+  background: var(--deep3);
+  border-radius: 3px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.resume-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), #6cb6ff);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.resume-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.resume-btn {
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-weight: 800;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.resume-btn:hover { background: #5ba3ff; transform: translateY(-1px); }
+
+.resume-discard-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--deep3);
+  border-radius: 10px;
+  padding: 0.4rem 1rem;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.resume-discard-btn:hover { color: var(--red); border-color: var(--red); }
+
+/* ══ HAMBURGER MENU ══ */
+.menu-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 500;
+  width: 44px;
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.menu-btn:hover { border-color: var(--gold-dark); }
+.menu-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(3px);
+}
+.menu-overlay.open { opacity: 1; pointer-events: all; }
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -340px;
+  width: 320px;
+  height: 100vh;
+  background: var(--deep2);
+  border-left: 1px solid var(--deep3);
+  z-index: 700;
+  transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.side-menu.open { right: 0; }
+
+.side-menu-header {
+  padding: 1.2rem 1.2rem 1rem;
+  border-bottom: 1px solid var(--deep3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--deep);
+}
+.side-menu-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.side-close-btn {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.side-close-btn:hover { border-color: var(--red); color: var(--red); }
+
+.side-section {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--deep3);
+}
+.side-section-title {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+/* last result summary */
+.last-result-card {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 12px;
+  padding: 1rem;
+}
+.lr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+.lr-pct {
+  font-family: 'Cairo', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.lr-stats {
+  display: flex;
+  gap: 0.8rem;
+  font-size: 0.82rem;
+}
+.lr-stat { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+.lr-stat-val { font-weight: 800; font-size: 1.1rem; }
+.lr-stat-lbl { color: var(--text-muted); font-size: 0.72rem; }
+.lr-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
+.lr-bar-row { display: flex; gap: 4px; margin-top: 0.6rem; border-radius: 6px; overflow: hidden; height: 6px; }
+.lr-bar-correct { background: var(--green); transition: width 0.6s ease; }
+.lr-bar-wrong   { background: var(--red);   transition: width 0.6s ease; }
+.lr-bar-skip    { background: var(--deep3); flex: 1; }
+.no-result-msg {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1.2rem 0;
+}
+
+/* menu action buttons */
+.menu-action-btn {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+.menu-action-btn:hover { border-color: var(--gold-dark); background: var(--surface2); }
+.menu-action-btn.accent {
+  background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05));
+  border-color: var(--gold-dark);
+  color: var(--gold-light);
+  font-weight: 700;
+}
+.menu-action-btn.accent:hover { background: linear-gradient(135deg, rgba(201,168,76,0.3), rgba(201,168,76,0.1)); }
+.menu-action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+/* ══ BALANCE AMOUNT (shared transitions) ══ */
+.balance-amount {
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--gold-light);
+  line-height: 1.2;
+  transition: color 0.3s;
+}
+.balance-amount.gaining { color: #4ade80; }
+.balance-amount.losing  { color: #f87171; }
+
+/* balance popup (top of screen) */
+.balance-popup {
+  position: fixed;
+  top: 5rem;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  z-index: 9998;
+  background: var(--surface2);
+  border-radius: 16px;
+  padding: 0.65rem 1.4rem;
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  animation: balPop 1.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+.balance-popup.gain {
+  border: 1.5px solid var(--green);
+  color: var(--green);
+  box-shadow: 0 0 30px rgba(63,185,80,0.35);
+}
+.balance-popup.lose {
+  border: 1.5px solid var(--red);
+  color: var(--red);
+  box-shadow: 0 0 30px rgba(248,81,73,0.35);
+}
+.balance-popup.bonus {
+  border: 2px solid var(--gold);
+  color: var(--gold-light);
+  box-shadow: 0 0 40px rgba(201,168,76,0.5);
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(22,27,34,0.97));
+}
+@keyframes balPop {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.7) translateY(0); }
+  20%  { opacity: 1; transform: translateX(-50%) scale(1.05) translateY(-4px); }
+  80%  { opacity: 1; transform: translateX(-50%) scale(1) translateY(-8px); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.9) translateY(-20px); }
+}
+
+/* ══ STATS PANEL (top button → overlay) ══ */
+.stats-panel-btn {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.2rem;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.stats-top-bar {
+  background: linear-gradient(90deg, rgba(13,17,23,0.9), rgba(22,27,34,0.92), rgba(13,17,23,0.9));
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+  backdrop-filter: blur(10px);
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.stats-top-bar:hover {
+  background: linear-gradient(90deg, rgba(22,27,34,0.95), rgba(33,38,45,0.97), rgba(22,27,34,0.95));
+}
+.stats-top-bar {
+  justify-content: space-between;
+  padding: 0 1rem;
+  gap: 0.6rem;
+}
+
+/* Balance chip inside the top bar */
+.balance-inline-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06));
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 50px;
+  padding: 0.25rem 0.75rem;
+  cursor: default;
+  flex-shrink: 0;
+}
+.balance-icon-inline { font-size: 0.85rem; }
+.balance-inline-chip .balance-amount {
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: var(--gold-light);
+  transition: color 0.3s;
+}
+.balance-inline-chip .balance-amount.gaining { color: #4ade80; }
+.balance-inline-chip .balance-amount.losing  { color: #f87171; }
+
+.stats-top-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: 'Tajawal', sans-serif;
+  cursor: pointer;
+}
+.stats-top-bar-inner .arrow {
+  font-size: 0.65rem;
+  transition: transform 0.3s;
+}
+.stats-mini-chip {
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 50px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Stats overlay panel */
+.stats-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 800;
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  background: var(--deep2);
+  border-bottom: 2px solid var(--gold-dark);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  padding: 1rem 1.5rem 1.5rem;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.stats-overlay.open {
+  transform: translateY(0);
+}
+.stats-overlay-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 750;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.stats-overlay-bg.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.stats-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+.stats-overlay-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.stats-close-btn {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  color: var(--text-muted);
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.stats-close-btn:hover { border-color: var(--red); color: var(--red); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+@media (min-width: 480px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.stats-card {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 14px;
+  padding: 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 14px 14px 0 0;
+}
+.stats-card.s-correct::before { background: var(--green); }
+.stats-card.s-wrong::before   { background: var(--red); }
+.stats-card.s-pct-correct::before { background: var(--gold); }
+.stats-card.s-pct-wrong::before   { background: var(--orange); }
+
+.stats-card-val {
+  font-family: 'Cairo', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+.stats-card.s-correct .stats-card-val { color: var(--green); }
+.stats-card.s-wrong .stats-card-val   { color: var(--red); }
+.stats-card.s-pct-correct .stats-card-val { color: var(--gold); }
+.stats-card.s-pct-wrong .stats-card-val   { color: var(--orange); }
+.stats-card-lbl { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+
+.stats-balance-row {
+  background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.03));
+  border: 1.5px solid var(--gold-dark);
+  border-radius: 14px;
+  padding: 1rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.sbal-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.sbal-amount {
+  font-family: 'Cairo', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--gold-light);
+}
+.sbal-amount span { font-size: 0.9rem; color: var(--gold); }
+
+.retry-wrong-overlay-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(248,81,73,0.15), rgba(248,81,73,0.05));
+  border: 1.5px solid rgba(248,81,73,0.5);
+  color: #ff8080;
+  border-radius: 14px;
+  padding: 0.9rem 1.2rem;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.retry-wrong-overlay-btn:hover {
+  background: linear-gradient(135deg, rgba(248,81,73,0.25), rgba(248,81,73,0.1));
+  border-color: var(--red);
+  color: var(--red);
+  transform: translateY(-1px);
+}
+.retry-wrong-overlay-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+.wrong-badge-inline {
+  background: var(--red);
+  color: white;
+  border-radius: 50px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+/* bonus animation */
+@keyframes bonusBurst {
+  0%   { transform: scale(0.5); opacity: 0; }
+  40%  { transform: scale(1.15); opacity: 1; }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.bonus-announce {
+  animation: bonusBurst 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+/* history list */
+.hist-item {
+  background: var(--surface);
+  border: 1px solid var(--deep3);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.hist-pct-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.hist-pct-badge.A { background: rgba(63,185,80,0.2); color: var(--green); }
+.hist-pct-badge.B { background: rgba(201,168,76,0.2); color: var(--gold); }
+.hist-pct-badge.C { background: rgba(210,153,34,0.2); color: var(--orange); }
+.hist-pct-badge.D { background: rgba(248,81,73,0.2); color: var(--red); }
+.hist-info { flex: 1; min-width: 0; }
+.hist-score { font-size: 0.82rem; color: var(--text); font-weight: 600; }
+.hist-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+</style>
+</head>
+<body>
+
+<!-- ══ STATS TOP BAR (includes balance) ══ -->
+<div class="stats-panel-btn">
+  <div class="stats-top-bar" id="statsTopBar">
+    <!-- balance chip (not clickable for panel) -->
+    <div class="balance-inline-chip" onclick="event.stopPropagation()">
+      <span class="balance-icon-inline">💰</span>
+      <span class="balance-amount" id="balanceDisplay">0 د</span>
+    </div>
+    <!-- stats chips (open panel on click) -->
+    <div class="stats-top-bar-inner" onclick="openStatsPanel()">
+      <span>📊</span>
+      <span class="stats-mini-chip" id="topBarCorrect">✅ 0 صح</span>
+      <span class="stats-mini-chip" style="background:rgba(248,81,73,0.1);border-color:rgba(248,81,73,0.3);color:var(--red);" id="topBarWrong">❌ 0 خطأ</span>
+      <span class="arrow" id="statsArrow">▼</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RETRY WRONG QUICK BAR ══ -->
+<div class="retry-quick-bar" id="retryQuickBar">
+  <button class="retry-quick-btn" onclick="retryWrongQs()">
+    🔁 إعادة الأسئلة الخاطئة
+    <span class="retry-quick-badge" id="retryQuickCount">0</span>
+  </button>
+</div>
+
+<!-- ══ BALANCE CARD (hidden - kept for JS compatibility) ══ -->
+<div id="balanceCard" style="display:none"></div>
+<div class="stats-overlay-bg" id="statsOverlayBg" onclick="closeStatsPanel()"></div>
+
+<!-- ══ STATS OVERLAY ══ -->
+<div class="stats-overlay" id="statsOverlay">
+  <div class="stats-overlay-header">
+    <div class="stats-overlay-title">📊 لوحة الإحصائيات</div>
+    <button class="stats-close-btn" onclick="closeStatsPanel()">✕</button>
+  </div>
+
+  <!-- Balance big display -->
+  <div class="stats-balance-row">
+    <div>
+      <div class="sbal-label">💰 رصيدك الحالي</div>
+      <div class="sbal-amount" id="overlayBalance">0 <span>دينار</span></div>
+    </div>
+    <div style="text-align:left">
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.3rem">كل صح: +500 د</div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.3rem">كل خطأ: -250 د</div>
+      <div style="font-size:0.7rem;color:var(--gold)">إعادة خاطئة 100%: +50,000 د</div>
+    </div>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="stats-grid">
+    <div class="stats-card s-correct">
+      <div class="stats-card-val" id="ovCorrect">0</div>
+      <div class="stats-card-lbl">✅ إجابات صحيحة</div>
+    </div>
+    <div class="stats-card s-wrong">
+      <div class="stats-card-val" id="ovWrong">0</div>
+      <div class="stats-card-lbl">❌ إجابات خاطئة</div>
+    </div>
+    <div class="stats-card s-pct-correct">
+      <div class="stats-card-val" id="ovPctCorrect">0%</div>
+      <div class="stats-card-lbl">📈 نسبة الصح</div>
+    </div>
+    <div class="stats-card s-pct-wrong">
+      <div class="stats-card-val" id="ovPctWrong">0%</div>
+      <div class="stats-card-lbl">📉 نسبة الخطأ</div>
+    </div>
+  </div>
+
+  <!-- Retry wrong button -->
+  <button class="retry-wrong-overlay-btn" id="retryWrongOverlayBtn" onclick="retryWrongFromOverlay()" disabled>
+    🔁 إعادة اختبار الأسئلة الخاطئة
+    <span class="wrong-badge-inline" id="retryWrongCount">0</span>
+  </button>
+</div>
+
+<!-- ══ HAMBURGER BUTTON ══ -->
+<button class="menu-btn" id="menuBtn" onclick="openMenu()" title="القائمة" style="display:none">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ══ SIDE MENU OVERLAY ══ -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+<!-- ══ SIDE MENU ══ -->
+<div class="side-menu" id="sideMenu">
+  <div class="side-menu-header">
+    <div class="side-menu-title">📊 سجل النتائج</div>
+    <button class="side-close-btn" onclick="closeMenu()">✕</button>
+  </div>
+
+  <div class="side-section">
+    <div class="side-section-title">آخر نتيجة</div>
+    <div id="lastResultCard">
+      <div class="no-result-msg">لا توجد نتائج محفوظة بعد</div>
+    </div>
+  </div>
+
+  <div class="side-section">
+    <div class="side-section-title">إجراءات</div>
+    <button class="menu-action-btn accent" id="retryWrongBtn" onclick="retryWrongQs()" style="display:none">
+      🔁 إعادة اختبار الأسئلة الخاطئة
+      <span id="wrongCountBadge" style="margin-right:auto;background:var(--red);color:white;border-radius:50px;padding:0.1rem 0.55rem;font-size:0.75rem;font-weight:800"></span>
+    </button>
+    <button class="menu-action-btn" onclick="closeMenu();startQuiz()">▶ اختبار جديد</button>
+    <button class="menu-action-btn danger" onclick="clearHistory()">🗑 مسح السجل المحلي</button>
+  </div>
+
+  <div class="side-section" style="flex:1">
+    <div class="side-section-title">آخر الاختبارات</div>
+    <div id="historyList">
+      <div class="no-result-msg">لا يوجد سجل</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ HOME SCREEN ══════════════════ -->
+<div id="homeScreen" class="screen active">
+  <div class="logo-area">
+    <div class="logo-badge">📚</div>
+
+    <!-- ✦ تحية يوسف البطل ✦ -->
+    <div class="hero-greeting-wrap">
+      <div class="hero-stars">✦ ✦ ✦</div>
+      <div class="hero-greeting">كيف حالك يا يوسف البطل؟</div>
+      <div class="hero-stars">✦ ✦ ✦</div>
+    </div>
+
+    <h1 class="home-title">اختبار المواد الاجتماعية<br>الصف السادس الأساسي</h1>
+
+    <!-- ✦ اسم البطل ✦ -->
+    <div class="hero-name-badge">
+      <span class="hero-crown">👑</span>
+      <span class="hero-name-text">يوسف البطل</span>
+      <span class="hero-crown">👑</span>
+    </div>
+
+    <p class="home-subtitle">كتاب مواد الاجتماعية — كوردستان العراق</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-chip">🌍 <span>50</span> جغرافية</div>
+    <div class="stat-chip">📜 <span>50</span> تاريخ</div>
+    <div class="stat-chip">🏛️ <span>40</span> مواطنة</div>
+    <div class="stat-chip">📝 <span>140</span> سؤال كلياً</div>
+  </div>
+
+  <div class="section-selector">
+    <button class="section-btn all selected" onclick="selectSection('all', this)">
+      <div class="sec-icon all">🌟</div>
+      <div class="sec-text">
+        <div class="sec-name">الكل — جميع الأقسام</div>
+        <div class="sec-count">140 سؤال من الجغرافية والتاريخ والمواطنة</div>
+      </div>
+      <div class="sec-check">✓</div>
+    </button>
+    <button class="section-btn geo" onclick="selectSection('geo', this)">
+      <div class="sec-icon geo">🌍</div>
+      <div class="sec-text">
+        <div class="sec-name">جغرافية العراق</div>
+        <div class="sec-count">50 سؤال — الموقع، السطح، المناخ، الموارد</div>
+      </div>
+      <div class="sec-check">✓</div>
+    </button>
+    <button class="section-btn hist" onclick="selectSection('hist', this)">
+      <div class="sec-icon hist">📜</div>
+      <div class="sec-text">
+        <div class="sec-name">تاريخ كوردستان والعراق</div>
+        <div class="sec-count">50 سؤال — العثمانيون، الصفويون، الثورات</div>
+      </div>
+      <div class="sec-check">✓</div>
+    </button>
+    <button class="section-btn civic" onclick="selectSection('civic', this)">
+      <div class="sec-icon civic">🏛️</div>
+      <div class="sec-text">
+        <div class="sec-name">التربية الوطنية والمواطنة</div>
+        <div class="sec-count">40 سؤال — الدولة، الحقوق، المجتمع</div>
+      </div>
+      <div class="sec-check">✓</div>
+    </button>
+  </div>
+
+  <!-- زر استكمال من حيث توقفت -->
+  <div id="resumeBanner" style="display:none;width:100%;max-width:480px;margin-bottom:1rem;">
+    <div style="background:var(--surface);border:1px solid rgba(56,139,253,0.4);border-radius:12px;padding:0.6rem 1rem;display:flex;align-items:center;gap:0.7rem;">
+      <span style="font-size:0.82rem;color:var(--text-muted);flex:1;">📌 <span id="resumeDetail">اختبار غير مكتمل</span></span>
+      <button onclick="resumeQuiz()" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:0.3rem 0.8rem;font-size:0.78rem;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;white-space:nowrap;">▶ أكمل</button>
+      <button onclick="discardProgress()" style="background:transparent;color:var(--text-muted);border:1px solid var(--deep3);border-radius:8px;padding:0.3rem 0.7rem;font-size:0.78rem;font-family:'Tajawal',sans-serif;cursor:pointer;">✕</button>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startQuiz()">▶ ابدأ اختباراً جديداً</button>
+
+
+  <div class="cloud-badge" style="margin-top:1rem">
+    <div class="cloud-dot"></div>
+    النتائج تُحفظ تلقائياً في السحابة
+  </div>
+</div>
+
+<!-- ══════════════════ QUIZ SCREEN ══════════════════ -->
+<div id="quizScreen" class="screen">
+  <!-- Retry mode indicator -->
+  <div id="retryModeBanner" style="display:none;background:linear-gradient(135deg,rgba(248,81,73,0.15),rgba(248,81,73,0.05));border:1px solid rgba(248,81,73,0.4);border-radius:10px;padding:0.5rem 1rem;margin-bottom:0.8rem;font-size:0.82rem;color:#ff8080;text-align:center;font-weight:700;">
+    🔁 وضع إعادة الأسئلة الخاطئة — +250 دينار لكل إجابة صحيحة • مكافأة 50,000 عند 100%
+  </div>
+  <div class="quiz-header">
+    <div class="quiz-progress-info">
+      السؤال <strong id="qCurrent">1</strong> من <strong id="qTotal">140</strong>
+    </div>
+    <span class="quiz-section-tag" id="qSectionTag">جغرافية</span>
+    <div class="timer-wrap">⏱ <span class="timer-display" id="timerDisplay">--:--</span></div>
+    <button class="quit-btn" onclick="confirmQuit()">✕ خروج</button>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number" id="qNumber">سؤال ١</div>
+    <div class="q-text" id="qText">نص السؤال هنا...</div>
+  </div>
+
+  <div class="options-grid" id="optionsGrid"></div>
+
+  <div class="feedback-box" id="feedbackBox">
+    <div class="feedback-icon" id="feedbackIcon"></div>
+    <div class="feedback-text" id="feedbackText"></div>
+  </div>
+
+  <div class="quiz-nav">
+    <button class="nav-btn prev" id="prevBtn" onclick="prevQuestion()" disabled>→ السابق</button>
+    <button class="nav-btn next" id="nextBtn" onclick="nextQuestion()" disabled>التالي ←</button>
+  </div>
+</div>
+
+<!-- ══════════════════ RESULTS SCREEN ══════════════════ -->
+<div id="resultsScreen" class="screen">
+  <div class="results-hero">
+    <div class="score-ring">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle class="score-ring-track" cx="70" cy="70" r="60"/>
+        <circle class="score-ring-fill" id="scoreRingFill" cx="70" cy="70" r="60"
+          stroke-dasharray="377" stroke-dashoffset="377"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-pct" id="scorePct">0%</div>
+        <div class="score-label">النتيجة</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="gradeBadge">ممتاز</div>
+    <div class="result-name" id="resultName">طالب</div>
+    <div class="result-sub" id="resultSub">أنهيت الاختبار بنجاح</div>
+  </div>
+
+  <!-- كود النتيجة -->
+  <div class="result-code-box" id="resultCodeBox">
+    <div class="result-code-label">🔑 كود نتيجتك</div>
+    <div class="result-code-value" id="resultCodeDisplay" onclick="copyResultCode()" title="اضغط للنسخ">------</div>
+    <div class="result-code-hint">اضغط للنسخ • احتفظ بهذا الكود لعرض نتيجتك لاحقاً</div>
+  </div>
+
+  <div class="results-stats">
+    <div class="result-stat">
+      <span class="result-stat-val c-green" id="correctCount">0</span>
+      <span class="result-stat-lbl">✓ إجابات صحيحة</span>
+    </div>
+    <div class="result-stat">
+      <span class="result-stat-val c-red" id="wrongCount">0</span>
+      <span class="result-stat-lbl">✗ إجابات خاطئة</span>
+    </div>
+    <div class="result-stat">
+      <span class="result-stat-val c-gold" id="timeUsed">0:00</span>
+      <span class="result-stat-lbl">⏱ الوقت المستغرق</span>
+    </div>
+  </div>
+
+  <div class="section-scores">
+    <div class="section-score-title">📊 الأداء حسب القسم</div>
+    <div class="sec-score-row" id="geoScoreRow">
+      <span class="sec-score-name">🌍 جغرافية</span>
+      <div class="sec-score-bar-track"><div class="sec-score-bar-fill" id="geoBar" style="width:0%;background:var(--geo-color)"></div></div>
+      <span class="sec-score-pct" id="geoPct" style="color:var(--geo-color)">0%</span>
+    </div>
+    <div class="sec-score-row" id="histScoreRow">
+      <span class="sec-score-name">📜 تاريخ</span>
+      <div class="sec-score-bar-track"><div class="sec-score-bar-fill" id="histBar" style="width:0%;background:var(--hist-color)"></div></div>
+      <span class="sec-score-pct" id="histPct" style="color:var(--hist-color)">0%</span>
+    </div>
+    <div class="sec-score-row" id="civicScoreRow">
+      <span class="sec-score-name">🏛️ مواطنة</span>
+      <div class="sec-score-bar-track"><div class="sec-score-bar-fill" id="civicBar" style="width:0%;background:var(--civic-color)"></div></div>
+      <span class="sec-score-pct" id="civicPct" style="color:var(--civic-color)">0%</span>
+    </div>
+  </div>
+
+  <!-- مراجعة كاملة للأسئلة -->
+  <div class="full-review-section">
+    <div class="full-review-title">📋 جميع الأسئلة</div>
+    <div class="qa-tabs">
+      <button class="qa-tab tab-all active" onclick="filterQA('all',this)">الكل</button>
+      <button class="qa-tab tab-correct" onclick="filterQA('correct',this)">✓ صحيح</button>
+      <button class="qa-tab tab-wrong" onclick="filterQA('wrong',this)">✗ خاطئ</button>
+      <button class="qa-tab tab-skip" onclick="filterQA('skip',this)">⬜ لم يُجب</button>
+    </div>
+    <div class="qa-list" id="qaList"></div>
+    <div id="allCorrectMsg" style="display:none;color:var(--green);text-align:center;padding:1rem;font-weight:700">🎉 أحسنت! أجبت على جميع الأسئلة بشكل صحيح!</div>
+  </div>
+
+  <div class="leaderboard">
+    <div class="lb-title">🏆 أفضل النتائج المحفوظة</div>
+    <div id="leaderboardList"><div style="color:var(--text-muted);font-size:0.85rem">جاري التحميل...</div></div>
+  </div>
+
+  <div class="result-actions">
+    <button class="action-btn primary" onclick="restartQuiz()">🔄 إعادة الاختبار</button>
+    <button class="action-btn secondary" id="retryWrongResultBtn" onclick="retryWrongQs()" style="display:none;background:linear-gradient(135deg,rgba(248,81,73,0.2),rgba(248,81,73,0.05));border-color:rgba(248,81,73,0.5);color:#ff8080;">🔁 أعِد الأسئلة الخاطئة</button>
+    <button class="action-btn secondary" onclick="goHome()">🏠 القائمة الرئيسية</button>
+  </div>
+</div>
+
+<!-- ══════════════════ LOOKUP SCREEN ══════════════════ -->
+
+
+<script>
+// ══════════════════════════════════════════
+// HAMBURGER MENU
+// ══════════════════════════════════════════
+const HISTORY_KEY = 'quizHistory_v1';
+
+function openMenu() {
+  loadMenuData();
+  document.getElementById('sideMenu').classList.add('open');
+  document.getElementById('menuOverlay').classList.add('open');
+}
+
+function closeMenu() {
+  document.getElementById('sideMenu').classList.remove('open');
+  document.getElementById('menuOverlay').classList.remove('open');
+}
+
+function saveToHistory(result) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    hist.unshift(result);
+    if (hist.length > 10) hist.splice(10);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  } catch(e) {}
+}
+
+function loadMenuData() {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+    // آخر نتيجة
+    const card = document.getElementById('lastResultCard');
+    if (hist.length === 0) {
+      card.innerHTML = '<div class="no-result-msg">لا توجد نتائج محفوظة بعد</div>';
+      document.getElementById('retryWrongBtn').style.display = 'none';
+    } else {
+      const r = hist[0];
+      const pct = r.pct || 0;
+      const pctColor = pct >= 90 ? 'var(--green)' : pct >= 75 ? 'var(--gold)' : pct >= 60 ? 'var(--orange)' : 'var(--red)';
+      const total = r.total || 1;
+      const cPct = Math.round((r.correct / total) * 100);
+      const wPct = Math.round((r.wrong / total) * 100);
+      const secNames = { all: 'الكل', geo: 'جغرافية', hist: 'تاريخ', civic: 'مواطنة' };
+      const m = Math.floor((r.timeSeconds||0)/60), s = (r.timeSeconds||0)%60;
+      card.innerHTML = `
+        <div class="last-result-card">
+          <div class="lr-row">
+            <div class="lr-pct" style="color:${pctColor}">${pct}%</div>
+            <div class="lr-stats">
+              <div class="lr-stat"><span class="lr-stat-val" style="color:var(--green)">${r.correct}</span><span class="lr-stat-lbl">صحيح</span></div>
+              <div class="lr-stat"><span class="lr-stat-val" style="color:var(--red)">${r.wrong}</span><span class="lr-stat-lbl">خطأ</span></div>
+              <div class="lr-stat"><span class="lr-stat-val" style="color:var(--blue)">${m}:${s.toString().padStart(2,'0')}</span><span class="lr-stat-lbl">وقت</span></div>
+            </div>
+          </div>
+          <div class="lr-bar-row">
+            <div class="lr-bar-correct" style="width:${cPct}%"></div>
+            <div class="lr-bar-wrong" style="width:${wPct}%"></div>
+            <div class="lr-bar-skip"></div>
+          </div>
+          <div class="lr-meta">${secNames[r.section]||r.section} • ${r.total} سؤال • ${r.date||''}</div>
+        </div>`;
+
+      // زر إعادة الأسئلة الخاطئة
+      const wrongQs = (r.qaDetails||[]).filter(q => q.status === 'wrong');
+      const retryBtn = document.getElementById('retryWrongBtn');
+      if (wrongQs.length > 0) {
+        retryBtn.style.display = 'flex';
+        document.getElementById('wrongCountBadge').textContent = wrongQs.length;
+      } else {
+        retryBtn.style.display = 'none';
+      }
+    }
+
+    // سجل الاختبارات
+    const histList = document.getElementById('historyList');
+    if (hist.length === 0) {
+      histList.innerHTML = '<div class="no-result-msg">لا يوجد سجل</div>';
+      return;
+    }
+    const secNames = { all: 'الكل', geo: 'جغرافية', hist: 'تاريخ', civic: 'مواطنة' };
+    histList.innerHTML = hist.map((r, i) => {
+      const pct = r.pct || 0;
+      const cls = pct >= 90 ? 'A' : pct >= 75 ? 'B' : pct >= 60 ? 'C' : 'D';
+      const m = Math.floor((r.timeSeconds||0)/60), s = (r.timeSeconds||0)%60;
+      return `
+        <div class="hist-item">
+          <div class="hist-pct-badge ${cls}">${pct}%</div>
+          <div class="hist-info">
+            <div class="hist-score">${r.correct}/${r.total} صحيح • ${r.wrong} خطأ</div>
+            <div class="hist-meta">${secNames[r.section]||''} • ⏱${m}:${s.toString().padStart(2,'0')} • ${r.date||''}</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+function retryWrongQs() {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (!hist.length) return;
+    const wrongQs = (hist[0].qaDetails||[]).filter(q => q.status === 'wrong').map(q => q.q);
+    if (!wrongQs.length) return;
+    localStorage.setItem('retryWrongQuestions', JSON.stringify(wrongQs));
+    closeMenu();
+    startQuizWithWrong(wrongQs);
+  } catch(e) {}
+}
+
+function startQuizWithWrong(wrongQTexts) {
+  startQuizWithWrong_enhanced(wrongQTexts);
+}
+
+function clearHistory() {
+  if (!confirm('مسح سجل الاختبارات المحلي؟')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  loadMenuData();
+}
+
+// ══════════════════════════════════════════
+const allQuestions = [
+// ─── GEOGRAPHY (1-50) ───
+{id:1,sec:'geo',q:'أين يقع العراق بالنسبة لقارة آسيا؟',correct:'في الجزء الجنوبي الغربي',options:['في الجزء الجنوبي الغربي','في الجزء الشمالي الشرقي','في وسط القارة','في الجزء الجنوبي الشرقي']},
+{id:2,sec:'geo',q:'ما هي الدول التي تحد العراق من الشمال والشرق؟',correct:'تركيا شمالاً وإيران شرقاً',options:['تركيا شمالاً وإيران شرقاً','سوريا شمالاً والأردن شرقاً','إيران شمالاً وتركيا شرقاً','الكويت شمالاً والسعودية شرقاً']},
+{id:3,sec:'geo',q:'ما هي الدول التي تحد العراق من الغرب؟',correct:'سوريا والأردن',options:['سوريا والأردن','تركيا وإيران','الكويت والسعودية','مصر وليبيا']},
+{id:4,sec:'geo',q:'ما هو نظام الحكم في العراق؟',correct:'جمهوري برلماني فيدرالي',options:['جمهوري برلماني فيدرالي','ملكي دستوري','جمهوري رئاسي','إمارة دستورية']},
+{id:5,sec:'geo',q:'متى تأسست الدولة العراقية؟',correct:'عام 1921م',options:['عام 1921م','عام 1932م','عام 1958م','عام 1900م']},
+{id:6,sec:'geo',q:'كم تبلغ مساحة العراق الكلية؟',correct:'438,317 كم²',options:['438,317 كم²','500,000 كم²','350,000 كم²','600,000 كم²']},
+{id:7,sec:'geo',q:'كم قدر عدد سكان العراق عام 2014؟',correct:'بنحو 36 مليون نسمة',options:['بنحو 36 مليون نسمة','بنحو 20 مليون نسمة','بنحو 50 مليون نسمة','بنحو 10 مليون نسمة']},
+{id:8,sec:'geo',q:'إلى كم منطقة ينقسم سطح العراق؟',correct:'أربع مناطق',options:['أربع مناطق','ثلاث مناطق','خمس مناطق','منطقتين']},
+{id:9,sec:'geo',q:'ما هي أعلى قمة جبلية في العراق؟',correct:'قمة هلكورد (3607 متر)',options:['قمة هلكورد (3607 متر)','جبل سنجار','جبل حمرين','جبل مكحول']},
+{id:10,sec:'geo',q:'كم تشكل مساحة المنطقة الجبلية من العراق؟',correct:'6%',options:['6%','15%','24%','55%']},
+{id:11,sec:'geo',q:'اذكر اسمين لسلاسل جبلية بسيطة الالتواء في العراق.',correct:'جبل كارة وجبل سفين',options:['جبل كارة وجبل سفين','جبل هلكورد وحمرين','سنجار وقنديل','مكحول وحمرين']},
+{id:12,sec:'geo',q:'ما هي أهمية المنطقة الجبلية في العراق؟',correct:'مصدر للمياه، منطقة سياحية، غنية بالمعادن',options:['مصدر للمياه، منطقة سياحية، غنية بالمعادن','منطقة زراعية خصبة فقط','مصدر للنفط والغاز','منطقة صناعية متطورة']},
+{id:13,sec:'geo',q:'كم تشكل المنطقة المتموجة من مساحة العراق؟',correct:'15%',options:['15%','6%','24%','55%']},
+{id:14,sec:'geo',q:'اذكر اثنين من مرتفعات المنطقة المتموجة في العراق.',correct:'حمرين ومكحول',options:['حمرين ومكحول','هلكورد وسفين','سنجار وسفين','الهضبة الغربية والسهل الرسوبي']},
+{id:15,sec:'geo',q:'كم تشكل مساحة السهل الرسوبي من العراق؟',correct:'24%',options:['24%','6%','15%','55%']},
+{id:16,sec:'geo',q:'بماذا تتميز أراضي السهل الرسوبي؟',correct:'بالانبساط والاستواء',options:['بالانبساط والاستواء','بالارتفاع والوعورة','بالجفاف الشديد','بكثرة الغابات']},
+{id:17,sec:'geo',q:'اذكر اسمي هورين في جنوب العراق.',correct:'هور الحويزة وهور الحمار',options:['هور الحويزة وهور الحمار','بحيرة الثرثار وحبانية','دجلة والفرات','شط العرب والخليج']},
+{id:18,sec:'geo',q:'كم تشكل مساحة الهضبة الغربية من العراق؟',correct:'55%',options:['55%','24%','15%','6%']},
+{id:19,sec:'geo',q:'ما هي العناصر الأربعة التي تميز مناخ العراق؟',correct:'قلة الأمطار، انخفاض الرطوبة، كثرة الإشعاع الشمسي، التطرف الحراري',options:['قلة الأمطار، انخفاض الرطوبة، كثرة الإشعاع الشمسي، التطرف الحراري','كثرة الأمطار، ارتفاع الرطوبة، اعتدال الحرارة، كثرة الثلوج','الرياح الموسمية، الضباب، الجليد، الأعاصير','درجات الحرارة المعتدلة، الأمطار الغزيرة، الرطوبة، الثلوج']},
+{id:20,sec:'geo',q:'ما هي العوامل المؤثرة في مناخ العراق؟',correct:'الموقع بالنسبة لدوائر العرض والموقع بالنسبة للبحار',options:['الموقع بالنسبة لدوائر العرض والموقع بالنسبة للبحار','ارتفاع المناطق الجبلية فقط','قرب المنطقة من القطب الشمالي','اتجاه الرياح القطبية']},
+{id:21,sec:'geo',q:'ما هما الموسمان الرئيسيان في العراق؟',correct:'الصيف والشتاء',options:['الصيف والشتاء','الربيع والخريف','الربيع والصيف','الشتاء والخريف']},
+{id:22,sec:'geo',q:'ما هي مصادر المياه في العراق؟',correct:'الثلوج والأمطار، المياه السطحية، المياه الجوفية',options:['الثلوج والأمطار، المياه السطحية، المياه الجوفية','البحار فقط','المياه الجوفية فقط','الأنهار المستوردة من الخارج']},
+{id:23,sec:'geo',q:'أين يقع حمام العليل؟',correct:'في محافظة نينوى (الموصل)',options:['في محافظة نينوى (الموصل)','في بغداد','في كركوك','في البصرة']},
+{id:24,sec:'geo',q:'ما هو طول نهر الفرات داخل العراق؟',correct:'2900 كم',options:['2900 كم','1718 كم','500 كم','3500 كم']},
+{id:25,sec:'geo',q:'ما هو طول نهر دجلة؟',correct:'1718 كم',options:['1718 كم','2900 كم','1000 كم','3000 كم']},
+{id:26,sec:'geo',q:'اذكر ثلاثة روافد لنهر دجلة.',correct:'الخابور، الزاب الكبير، ديالي',options:['الخابور، الزاب الكبير، ديالي','الفرات، الكرخة، الكارون','العاصي، الليطاني، الأردن','الخابور، العاصي، النيل']},
+{id:27,sec:'geo',q:'من أين يتكون شط العرب؟',correct:'من التقاء دجلة والفرات عند كرمة علي',options:['من التقاء دجلة والفرات عند كرمة علي','من الخليج العربي مباشرة','من نهر الكارون فقط','من بحيرة الثرثار']},
+{id:28,sec:'geo',q:'ما هي أقدم سدة على نهر الفرات؟',correct:'سدة الهندية (1913م)',options:['سدة الهندية (1913م)','سد الموصل','سد دوكان','سد حديثة']},
+{id:29,sec:'geo',q:'أين يقع سد دوكان؟',correct:'على الزاب الصغير',options:['على الزاب الصغير','على نهر ديالي','على الفرات','على شط العرب']},
+{id:30,sec:'geo',q:'أين يقع سد دربندخان؟',correct:'على نهر سيروان (ديالي)',options:['على نهر سيروان (ديالي)','على الزاب الكبير','على الفرات','على الخابور']},
+{id:31,sec:'geo',q:'ما هي نسبة سكان القرى المشتغلين بالزراعة عام 2001؟',correct:'33%',options:['33%','50%','20%','70%']},
+{id:32,sec:'geo',q:'ما هي أقسام المحاصيل الزراعية؟',correct:'غذائية، صناعية، علفية',options:['غذائية، صناعية، علفية','غذائية وصناعية فقط','حيوانية ونباتية','صيفية وشتوية فقط']},
+{id:33,sec:'geo',q:'متى يزرع محصول الحنطة؟',correct:'في نهاية تشرين الأول (محصول شتوي)',options:['في نهاية تشرين الأول (محصول شتوي)','في بداية نيسان (محصول صيفي)','في تموز (محصول صيفي)','في كانون الثاني']},
+{id:34,sec:'geo',q:'أين تكثر زراعة الرز في العراق؟',correct:'ميسان، ذي قار، ودهوك (آكري)',options:['ميسان، ذي قار، ودهوك (آكري)','بغداد وديالي','نينوى وكركوك','الأنبار والبصرة']},
+{id:35,sec:'geo',q:'اذكر ثلاثة أنواع من الحمضيات تزرع في بغداد وديالي.',correct:'البرتقال، الليمون الحامض، واللالنكي',options:['البرتقال، الليمون الحامض، واللالنكي','الرمان والتفاح والعنب','التمر والتين والزيتون','الموز والمانجو والأناناس']},
+{id:36,sec:'geo',q:'كم يبلغ عدد أشجار النخيل في العراق تقريباً؟',correct:'22 مليون نخلة',options:['22 مليون نخلة','5 مليون نخلة','50 مليون نخلة','10 مليون نخلة']},
+{id:37,sec:'geo',q:'اذكر محصولين صناعيين صيفيين.',correct:'القطن والتبغ',options:['القطن والتبغ','الحنطة والشعير','الرز والذرة','البنجر والبرسيم']},
+{id:38,sec:'geo',q:'أين يزرع البنجر (محصول شتوي) في العراق؟',correct:'في إقليم كوردستان',options:['في إقليم كوردستان','في البصرة','في الأنبار','في بغداد']},
+{id:39,sec:'geo',q:'ما هي أهمية الثروة الحيوانية؟',correct:'توفر الغذاء وتدخل في الصناعة',options:['توفر الغذاء وتدخل في الصناعة','مصدر للطاقة فقط','للزينة والترفيه','لا أهمية اقتصادية لها']},
+{id:40,sec:'geo',q:'اذكر ثلاثة أنواع من الأبقار تتربى في العراق.',correct:'الاعتيادية، والكوردية، والجاموس',options:['الاعتيادية، والكوردية، والجاموس','الهولشتاين، والجيرسي، والأبردين','الجمال والخيول والحمير','الغنم والماعز والأغنام']},
+{id:41,sec:'geo',q:'ما هي أولى مصادر الطاقة استخداماً في العراق؟',correct:'النفط',options:['النفط','الطاقة الشمسية','الغاز الطبيعي','الطاقة الكهرومائية']},
+{id:42,sec:'geo',q:'أين يقع حقل بابا كوركور النفطي؟',correct:'في مدينة كركوك',options:['في مدينة كركوك','في البصرة','في الموصل','في بغداد']},
+{id:43,sec:'geo',q:'اذكر اسم حقل نفطي في محافظة ميسان.',correct:'حقل أبو غراب',options:['حقل أبو غراب','حقل الرميلة','حقل كركوك','حقل غاز البيجي']},
+{id:44,sec:'geo',q:'أين توجد أكبر مصادر الكبريت في العراق؟',correct:'في منطقة المشراق جنوب الموصل',options:['في منطقة المشراق جنوب الموصل','في البصرة','في كركوك','في الأنبار']},
+{id:45,sec:'geo',q:'اذكر منطقة تتوفر فيها مناجم الفوسفات في العراق.',correct:'عكاشات في الهضبة الغربية',options:['عكاشات في الهضبة الغربية','في كركوك','في السليمانية','في ميسان']},
+{id:46,sec:'geo',q:'إلى كم قسم تنقسم الصناعة؟',correct:'استخراجية وتحويلية',options:['استخراجية وتحويلية','زراعية وصناعية','ثقيلة وخفيفة','محلية وعالمية']},
+{id:47,sec:'geo',q:'اذكر نوعاً من الصناعات الكيماوية في العراق.',correct:'صناعة الأدوية والصابون',options:['صناعة الأدوية والصابون','صناعة الحديد والصلب','صناعة الخشب والأثاث','صناعة المنسوجات']},
+{id:48,sec:'geo',q:'ما هي أنواع طرق النقل في العراق؟',correct:'برية، مائية، جوية',options:['برية، مائية، جوية','برية وجوية فقط','بحرية وجوية فقط','برية فقط']},
+{id:49,sec:'geo',q:'اذكر مطارين دوليين في العراق.',correct:'مطار بغداد ومطار أربيل',options:['مطار بغداد ومطار أربيل','مطار الموصل ومطار البصرة','مطار كركوك ومطار السليمانية','مطار ناصرية ومطار الديوانية']},
+{id:50,sec:'geo',q:'اذكر موقعاً أثرياً سياحياً في العراق.',correct:'آثار بابل',options:['آثار بابل','برج إيفل','أهرامات مصر','الكولوسيوم الروماني']},
+
+// ─── HISTORY (51-100) ───
+{id:51,sec:'hist',q:'من وضع أساس الدولة الصفوية عام 1501م؟',correct:'الشاه إسماعيل الصفوي',options:['الشاه إسماعيل الصفوي','السلطان سليم الأول','الملا إدريس البدليسي','الشاه طهماسب']},
+{id:52,sec:'hist',q:'متى احتلت الدولة الصفوية مدينة بغداد؟',correct:'عام 1508م',options:['عام 1508م','عام 1501م','عام 1514م','عام 1534م']},
+{id:53,sec:'hist',q:'من هو مؤسس الدولة العثمانية؟',correct:'عثمان بن أرطغرل',options:['عثمان بن أرطغرل','السلطان سليم الأول','الشاه إسماعيل','السلطان سليمان القانوني']},
+{id:54,sec:'hist',q:'متى وقعت معركة جالديران؟',correct:'23 آب 1514م',options:['23 آب 1514م','1501م','1534م','1639م']},
+{id:55,sec:'hist',q:'من انتصر في معركة جالديران؟',correct:'العثمانيون بقيادة السلطان سليم الأول',options:['العثمانيون بقيادة السلطان سليم الأول','الصفويون بقيادة الشاه إسماعيل','الكورد المستقلون','المماليك المصريون']},
+{id:56,sec:'hist',q:'كم عدد الأمراء الكورد الذين انضموا للعثمانيين في جالديران؟',correct:'16 أميراً',options:['16 أميراً','5 أمراء','30 أميراً','10 أمراء']},
+{id:57,sec:'hist',q:'ما هي عاصمة الصفويين التي احتلها العثمانيون بعد جالديران؟',correct:'مدينة تبريز',options:['مدينة تبريز','مدينة أصفهان','مدينة بغداد','مدينة شيراز']},
+{id:58,sec:'hist',q:'من هو الوسيط في اتفاقية 1514م بين الكورد والعثمانيين؟',correct:'الملا إدريس البدليسي',options:['الملا إدريس البدليسي','الشيخ محمود الحفيد','مصطفى البارزاني','إبراهيم باشا الباباني']},
+{id:59,sec:'hist',q:'اذكر إمارة كوردية كانت موجودة في القرن السادس عشر.',correct:'إمارة هكاري',options:['إمارة هكاري','إمارة الرياض','إمارة دبي','إمارة الكويت']},
+{id:60,sec:'hist',q:'ما هي عاصمة إمارة بهدينان؟',correct:'مدينة العمادية (آميدي)',options:['مدينة العمادية (آميدي)','مدينة رواندوز','مدينة السليمانية','مدينة أربيل']},
+{id:61,sec:'hist',q:'متى تم القضاء نهائياً على إمارة بهدينان؟',correct:'عام 1842م',options:['عام 1842م','عام 1784م','عام 1880م','عام 1920م']},
+{id:62,sec:'hist',q:'أين تقع إمارة سوران؟',correct:'في محافظة أربيل حالياً',options:['في محافظة أربيل حالياً','في محافظة السليمانية','في محافظة دهوك','في محافظة كركوك']},
+{id:63,sec:'hist',q:'من هو الأمير الذي استلم السلطة في إمارة سوران عام 1813م؟',correct:'محمد باشا (الباشا الكبير)',options:['محمد باشا (الباشا الكبير)','إبراهيم باشا الباباني','الشيخ محمود الحفيد','الملا إدريس البدليسي']},
+{id:64,sec:'hist',q:'ما هي عاصمة إمارة سوران؟',correct:'مدينة رواندوز',options:['مدينة رواندوز','مدينة العمادية','مدينة السليمانية','مدينة دهوك']},
+{id:65,sec:'hist',q:'متى تأسست مدينة السليمانية كعاصمة لإمارة بابان؟',correct:'عام 1784م',options:['عام 1784م','عام 1842م','عام 1880م','عام 1501م']},
+{id:66,sec:'hist',q:'من هو مؤسس مدينة السليمانية؟',correct:'إبراهيم باشا الباباني',options:['إبراهيم باشا الباباني','الشاه إسماعيل','السلطان سليم','الملا إدريس البدليسي']},
+{id:67,sec:'hist',q:'اذكر إحدى ثورات الكورد ضد العثمانيين والصفويين.',correct:'انتفاضة قلعة دمدم',options:['انتفاضة قلعة دمدم','ثورة العشرين','معركة جالديران','ثورة 1958م']},
+{id:68,sec:'hist',q:'من قاد ثورة 1880م في شمال كوردستان؟',correct:'الشيخ عبيد الله النهري',options:['الشيخ عبيد الله النهري','مصطفى البارزاني','الشيخ محمود الحفيد','قاضي محمد']},
+{id:69,sec:'hist',q:'ما اسم أول جريدة كوردية صدرت عام 1898م؟',correct:'جريدة (كوردستان)',options:['جريدة (كوردستان)','جريدة الصباح','جريدة الجمهورية','جريدة هاوار']},
+{id:70,sec:'hist',q:'أين صدرت أول جريدة كوردية؟',correct:'في القاهرة',options:['في القاهرة','في بغداد','في تبريز','في أنقرة']},
+{id:71,sec:'hist',q:'من هو العثماني الذي قام بإصلاحات في العراق؟',correct:'مدحت باشا',options:['مدحت باشا','السلطان سليم','الشاه عباس','الملا إدريس']},
+{id:72,sec:'hist',q:'اذكر أحد أعمال مدحت باشا في العراق.',correct:'إصدار قانون الطابو',options:['إصدار قانون الطابو','بناء القلاع العسكرية','احتلال كوردستان','نقل العاصمة']},
+{id:73,sec:'hist',q:'متى احتل البريطانيون مدينة البصرة؟',correct:'عام 1914م',options:['عام 1914م','عام 1920م','عام 1932م','عام 1900م']},
+{id:74,sec:'hist',q:'ما هي المعركة التي شارك فيها الكورد ضد الإنجليز عام 1915م؟',correct:'معركة الشعيبة',options:['معركة الشعيبة','معركة جالديران','معركة بازيان','معركة الفلوجة']},
+{id:75,sec:'hist',q:'من هو القائد الكوردي الذي عينه الإنجليز حاكماً على السليمانية؟',correct:'الشيخ محمود الحفيد',options:['الشيخ محمود الحفيد','مصطفى البارزاني','قاضي محمد','الشيخ أحمد البارزاني']},
+{id:76,sec:'hist',q:'متى اندلعت ثورة العشرين في العراق؟',correct:'30 حزيران 1920م',options:['30 حزيران 1920م','1914م','1932م','1958م']},
+{id:77,sec:'hist',q:'من هو رئيس عشيرة الظوالم الذي اعتقل قبل ثورة العشرين؟',correct:'الشيخ شعلان أبو الجون',options:['الشيخ شعلان أبو الجون','الشيخ محمود الحفيد','مصطفى البارزاني','عبد الكريم قاسم']},
+{id:78,sec:'hist',q:'اذكر سبباً لفشل ثورة 1920م.',correct:'الأسلحة البريطانية المتطورة',options:['الأسلحة البريطانية المتطورة','انتصار الثورة وعدم الحاجة للاستمرار','الاتفاق مع البريطانيين','انضمام الجيش للبريطانيين']},
+{id:79,sec:'hist',q:'من كان أول رئيس حكومة مؤقتة في العراق عام 1920م؟',correct:'عبد الرحمن الكيلاني',options:['عبد الرحمن الكيلاني','الملك فيصل الأول','الشيخ محمود','نوري السعيد']},
+{id:80,sec:'hist',q:'من هو أول ملك للعراق؟',correct:'الملك فيصل الأول',options:['الملك فيصل الأول','الملك غازي','الملك فيصل الثاني','نوري السعيد']},
+{id:81,sec:'hist',q:'متى أعلن الشيخ محمود الحفيد نفسه ملكاً على كوردستان؟',correct:'عام 1922م',options:['عام 1922م','عام 1914م','عام 1931م','عام 1946م']},
+{id:82,sec:'hist',q:'أين وقعت المعركة التي أسر فيها الشيخ محمود الحفيد؟',correct:'في مضيق بازيان',options:['في مضيق بازيان','في رواندوز','في العمادية','في السليمانية']},
+{id:83,sec:'hist',q:'ما هي المعاهدة التي وقعت بين العراق وبريطانيا عام 1930م؟',correct:'معاهدة نور السعيد - همفريز',options:['معاهدة نور السعيد - همفريز','معاهدة لوزان','معاهدة سيفر','اتفاقية سايكس بيكو']},
+{id:84,sec:'hist',q:'ما هي مدة معاهدة 1930م بين العراق وبريطانيا؟',correct:'25 سنة',options:['25 سنة','10 سنوات','50 سنة','5 سنوات']},
+{id:85,sec:'hist',q:'ماذا تسمى أحداث 6 أيلول 1930م في السليمانية؟',correct:'اليوم الأسود',options:['اليوم الأسود','يوم النصر','عيد الاستقلال','يوم التحرير']},
+{id:86,sec:'hist',q:'من قاد ثورة بارزان الأولى عام 1931م؟',correct:'الشيخ أحمد البارزاني',options:['الشيخ أحمد البارزاني','مصطفى البارزاني','الشيخ محمود الحفيد','قاضي محمد']},
+{id:87,sec:'hist',q:'من قاد ثورة ديار بكر عام 1925م؟',correct:'الشيخ سعيد بيران',options:['الشيخ سعيد بيران','مصطفى البارزاني','الشيخ عبيد الله النهري','قاضي محمد']},
+{id:88,sec:'hist',q:'من هو القائد الكوردي الذي لجأ إلى الاتحاد السوفيتي؟',correct:'مصطفى البارزاني',options:['مصطفى البارزاني','قاضي محمد','الشيخ محمود الحفيد','الشيخ أحمد البارزاني']},
+{id:89,sec:'hist',q:'متى تأسست جمهورية كوردستان (مهاباد)؟',correct:'22 كانون الثاني 1946م',options:['22 كانون الثاني 1946م','1920م','1932م','1958م']},
+{id:90,sec:'hist',q:'من كان رئيس جمهورية مهاباد؟',correct:'قاضي محمد',options:['قاضي محمد','مصطفى البارزاني','الشيخ محمود الحفيد','رفيق حلمي']},
+{id:91,sec:'hist',q:'كم استمرت جمهورية مهاباد؟',correct:'11 شهراً',options:['11 شهراً','3 سنوات','6 أشهر','سنتان']},
+{id:92,sec:'hist',q:'أين أعدم قاضي محمد؟',correct:'في ساحة جوار جرا بمهاباد',options:['في ساحة جوار جرا بمهاباد','في بغداد','في أنقرة','في طهران']},
+{id:93,sec:'hist',q:'متى أعدم قاضي محمد؟',correct:'31 آذار 1947م',options:['31 آذار 1947م','1946م','1920م','1952م']},
+{id:94,sec:'hist',q:'اذكر اسماً من شهداء "الضباط الأربعة" الكورد.',correct:'عزت عبد العزيز',options:['عزت عبد العزيز','قاضي محمد','مصطفى البارزاني','رفيق حلمي']},
+{id:95,sec:'hist',q:'متى أعدم الضباط الأربعة؟',correct:'19 حزيران 1947م',options:['19 حزيران 1947م','31 آذار 1947م','1920م','1946م']},
+{id:96,sec:'hist',q:'من أسس جمعية (هيوا)؟',correct:'رفيق حلمي',options:['رفيق حلمي','قاضي محمد','مصطفى البارزاني','الشيخ محمود الحفيد']},
+{id:97,sec:'hist',q:'ما هو الحزب الذي تأسس في مهاباد؟',correct:'الحزب الديمقراطي الكوردستاني (إيران)',options:['الحزب الديمقراطي الكوردستاني (إيران)','حزب البعث','الحزب الشيوعي العراقي','حزب هيوا']},
+{id:98,sec:'hist',q:'ما هي اللغة الرسمية لجمهورية مهاباد؟',correct:'اللغة الكوردية',options:['اللغة الكوردية','الفارسية','العربية','التركية']},
+{id:99,sec:'hist',q:'اذكر اسم مجلة صدرت في عهد جمهورية مهاباد.',correct:'مجلة (هاوار)',options:['مجلة (هاوار)','مجلة كوردستان','مجلة الاتحاد','مجلة الرافدين']},
+{id:100,sec:'hist',q:'من قاد قوات البيشمركة للدفاع عن مهاباد؟',correct:'مصطفى البارزاني',options:['مصطفى البارزاني','قاضي محمد','رفيق حلمي','الشيخ أحمد']},
+
+// ─── CIVICS (101-140) ───
+{id:101,sec:'civic',q:'عرف "الدولة".',correct:'كيان سياسي وإداري له سلطة سيادية على نطاق جغرافي محدد',options:['كيان سياسي وإداري له سلطة سيادية على نطاق جغرافي محدد','مجموعة من الناس تعيش في مكان واحد','مؤسسة خدمية فقط','حزب سياسي كبير']},
+{id:102,sec:'civic',q:'ما هي مقومات الدولة الأربعة؟',correct:'الأرض، الشعب، السلطة، السيادة',options:['الأرض، الشعب، السلطة، السيادة','الجيش، الشرطة، المحاكم، البرلمان','العلم، النشيد، الدستور، الجيش','المدارس، المستشفيات، الطرق، المصانع']},
+{id:103,sec:'civic',q:'عرف "المحافظة".',correct:'وحدة إدارية كبيرة تضم وحدات إدارية أقل سكاناً',options:['وحدة إدارية كبيرة تضم وحدات إدارية أقل سكاناً','مدينة كبيرة ذات تاريخ طويل','مجموعة من القرى المتجاورة','منطقة جغرافية طبيعية']},
+{id:104,sec:'civic',q:'ما هي المؤسسات الخدمية؟',correct:'هي التي تدير شؤون المواطنين مثل التعليم والصحة',options:['هي التي تدير شؤون المواطنين مثل التعليم والصحة','هي المصانع الكبيرة فقط','هي المؤسسات العسكرية','هي الأحزاب السياسية']},
+{id:105,sec:'civic',q:'اذكر ثلاثة من حقوق الطالب.',correct:'التعليم، الحماية، المساواة',options:['التعليم، الحماية، المساواة','العمل، السفر، التجارة','التصويت، الترشح، الانتخاب','المشاركة في الحرب']},
+{id:106,sec:'civic',q:'ما هي البيئة الأولى للإنسان؟',correct:'البيت',options:['البيت','المدرسة','الحي','الدولة']},
+{id:107,sec:'civic',q:'ما هي البيئة الثانية للإنسان؟',correct:'المدرسة',options:['المدرسة','البيت','الحي','المصنع']},
+{id:108,sec:'civic',q:'اذكر أحد واجبات المواطن تجاه الدولة.',correct:'الحفاظ على الممتلكات العامة',options:['الحفاظ على الممتلكات العامة','أخذ كل ما يمكن من الدولة','التهرب من الخدمة العسكرية','عدم دفع الضرائب']},
+{id:109,sec:'civic',q:'ما هو العدو الأول للمجتمع حسب المنهج؟',correct:'الجهل',options:['الجهل','الفقر','الحرب','المرض']},
+{id:110,sec:'civic',q:'متى يحتفل الكورد بعيد نوروز؟',correct:'21 آذار من كل عام',options:['21 آذار من كل عام','1 كانون الثاني','25 كانون الأول','1 حزيران']},
+{id:111,sec:'civic',q:'ما هي أهمية اتفاقية 11 آذار 1970م؟',correct:'أقرت بحقوق الشعب الكوردي',options:['أقرت بحقوق الشعب الكوردي','أعلنت استقلال العراق','وقّعت السلام مع إيران','أسست الجيش العراقي']},
+{id:112,sec:'civic',q:'متى اندلعت الانتفاضة الشعبية في كوردستان؟',correct:'5 آذار 1991م',options:['5 آذار 1991م','1992م','1988م','2003م']},
+{id:113,sec:'civic',q:'متى تأسست أول حكومة لإقليم كوردستان؟',correct:'4 تموز 1992م',options:['4 تموز 1992م','1991م','2003م','1988م']},
+{id:114,sec:'civic',q:'اذكر اثنين من مقومات القومية.',correct:'اللغة المشتركة والتاريخ المشترك',options:['اللغة المشتركة والتاريخ المشترك','الدين والجنسية فقط','المال والثروة','الجيش والأسلحة']},
+{id:115,sec:'civic',q:'عرف "البيئة".',correct:'كل ما يحيط بالإنسان من مكونات حية وغير حية',options:['كل ما يحيط بالإنسان من مكونات حية وغير حية','الطبيعة فقط','المدينة والبناء','الغابات والحيوانات فقط']},
+{id:116,sec:'civic',q:'ما هي أنواع البيئة؟',correct:'طبيعية واجتماعية',options:['طبيعية واجتماعية','برية وبحرية','ريفية وحضرية','داخلية وخارجية']},
+{id:117,sec:'civic',q:'متى نُشرت لائحة حقوق الإنسان الدولية؟',correct:'10 كانون الأول 1948م',options:['10 كانون الأول 1948م','1945م','1920م','1990م']},
+{id:118,sec:'civic',q:'اذكر حرية من حريات الإنسان.',correct:'حرية التملك',options:['حرية التملك','حرية إيذاء الآخرين','حرية عدم الدراسة','حرية سرقة الممتلكات']},
+{id:119,sec:'civic',q:'ما هو تعريف "الطفل" قانوناً؟',correct:'كل من لم يبلغ 18 سنة',options:['كل من لم يبلغ 18 سنة','كل من لم يبلغ 15 سنة','كل من لم يبلغ 21 سنة','كل من لم يبلغ 12 سنة']},
+{id:120,sec:'civic',q:'متى يصادف عيد الطفل العالمي؟',correct:'1 حزيران من كل عام',options:['1 حزيران من كل عام','1 كانون الثاني','21 آذار','25 كانون الأول']},
+{id:121,sec:'civic',q:'اذكر حقاً من حقوق الطفل في المدرسة.',correct:'حق اللعب والراحة',options:['حق اللعب والراحة','حق العمل خارج المدرسة','حق ترك الدراسة','حق غياب دائم']},
+{id:122,sec:'civic',q:'ما معنى "المساواة"؟',correct:'أن يكون جميع الناس سواسية أمام القانون',options:['أن يكون جميع الناس سواسية أمام القانون','أن يكون للغني حقوق أكثر','أن تختلف الحقوق حسب الجنس','أن يُعامل الأقوياء أفضل']},
+{id:123,sec:'civic',q:'اذكر إحدى مناسبات الأديان الأخرى في كوردستان.',correct:'عيد القيامة للمسيحيين',options:['عيد القيامة للمسيحيين','عيد الفطر للمسلمين','عيد الأم','عيد نوروز']},
+{id:124,sec:'civic',q:'ما هو دور المعلم تجاه طلابه؟',correct:'ينظر إليهم بعين المساواة',options:['ينظر إليهم بعين المساواة','يُفضل الأغنياء على الفقراء','يُعامل الأذكياء فقط','يتجاهل الطلاب الضعفاء']},
+{id:125,sec:'civic',q:'كيف نحافظ على نظافة بيئة المدرسة؟',correct:'عدم رمي النفايات في الساحة',options:['عدم رمي النفايات في الساحة','رمي القمامة في الفناء','إحضار الحيوانات للمدرسة','كسر الأشجار والزهور']},
+{id:126,sec:'civic',q:'ما هو واجبنا تجاه المجتمعات متعددة الأديان؟',correct:'العيش سوية باحترام',options:['العيش سوية باحترام','رفض التعامل مع المختلفين','محاولة تغيير دين الآخرين','تجنب الجيران المختلفين دينياً']},
+{id:127,sec:'civic',q:'اذكر مؤسسة ترفيهية للأطفال.',correct:'مدينة الألعاب',options:['مدينة الألعاب','محكمة القضاء','وزارة الدفاع','البنك المركزي']},
+{id:128,sec:'civic',q:'ما هي أهمية اللغة القومية؟',correct:'وسيلة للتفاهم وتقوية الشعور الوطني',options:['وسيلة للتفاهم وتقوية الشعور الوطني','لا أهمية لها في الوقت الحالي','مجرد أداة للتواصل اليومي فقط','تسبب الخلافات بين الناس']},
+{id:129,sec:'civic',q:'اذكر واجباً من واجبات الطفل.',correct:'احترام الوالدين والمعلمين',options:['احترام الوالدين والمعلمين','عدم الذهاب للمدرسة','إهمال الواجبات المنزلية','تجاهل تعليمات الوالدين']},
+{id:130,sec:'civic',q:'ماذا توفر الدولة من خلال المؤسسات الصحية؟',correct:'العلاج وبناء المستشفيات',options:['العلاج وبناء المستشفيات','الأسلحة العسكرية','المنتجات الترفيهية','الملابس والطعام فقط']},
+{id:131,sec:'civic',q:'ما هو دور بنك الإقليم؟',correct:'تأمين الأموال للرواتب والمشاريع',options:['تأمين الأموال للرواتب والمشاريع','طباعة الكتب المدرسية','بناء الطرق والجسور مباشرة','إدارة المدارس']},
+{id:132,sec:'civic',q:'اذكر شعاراً لجمهورية كوردستان (مهاباد).',correct:'العلم الكوردستاني والنشيد الوطني (أي رقيب)',options:['العلم الكوردستاني والنشيد الوطني (أي رقيب)','علم العراق الاتحادي','نشيد بلاد الرافدين','علم الدولة الصفوية']},
+{id:133,sec:'civic',q:'ما هو حق الطفل في الاسم؟',correct:'أن يحصل على اسم وجنسية عند ولادته',options:['أن يحصل على اسم وجنسية عند ولادته','أن يختار اسمه بنفسه عند بلوغ 18 سنة','أن يبقى بدون اسم حتى المدرسة','لا توجد حقوق قانونية للاسم']},
+{id:134,sec:'civic',q:'لماذا تسمى الدولة العراقية "فيدرالية"؟',correct:'لأنها تتكون من أقاليم ومحافظات متحدة',options:['لأنها تتكون من أقاليم ومحافظات متحدة','لأنها دولة ملكية','لأنها دولة دينية','لأن حكومتها تتكون من رئيس واحد فقط']},
+{id:135,sec:'civic',q:'اذكر مناسبة دينية إسلامية.',correct:'عيد الفطر',options:['عيد الفطر','عيد القيامة','عيد الميلاد','عيد الربيع']},
+{id:136,sec:'civic',q:'ما هو التاريخ المشترك للكورد؟',correct:'الدفاع عن أرضهم عبر السنين',options:['الدفاع عن أرضهم عبر السنين','الهجرة إلى بلاد بعيدة','التعاون مع الاحتلال الأجنبي','ترك الأرض والوطن']},
+{id:137,sec:'civic',q:'اذكر أحد مكونات البيئة الاجتماعية.',correct:'المحلة',options:['المحلة','الجبل','النهر','الصحراء']},
+{id:138,sec:'civic',q:'ما هي فائدة الطرق والمواصلات للمواطن؟',correct:'تسهل الانتقال وتوفر الوقت',options:['تسهل الانتقال وتوفر الوقت','تزيد التلوث والضوضاء فقط','لا فائدة منها في المناطق الريفية','تُستخدم فقط للأغراض العسكرية']},
+{id:139,sec:'civic',q:'كيف تعبر عن حبك لوطنك؟',correct:'بالاجتهاد في الدراسة وخدمة المجتمع',options:['بالاجتهاد في الدراسة وخدمة المجتمع','بترك البلاد والهجرة','بالتهاون في الواجبات','بعدم المشاركة في الحياة العامة']},
+{id:140,sec:'civic',q:'ما هي أهم مقومات القومية الكوردية؟',correct:'أرض كوردستان',options:['أرض كوردستان','الثروات المادية فقط','قوة الجيش','عدد السكان']},
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let selectedSection = 'all';
+let questions = [];
+let current = 0;
+let answers = {}; // {qIndex: chosenOption}
+let startTime = null;
+let timerInterval = null;
+let totalSeconds = 0;
+
+// ══════════════════════════════════════════
+// PROGRESS SAVE / RESUME
+// ══════════════════════════════════════════
+const PROGRESS_KEY = 'quizProgress_v1';
+
+function saveProgress() {
+  if (!questions.length) return;
+  const data = {
+    section: selectedSection,
+    questions: questions.map(q => ({ ...q, _shuffledOptions: q._shuffledOptions })),
+    answers,
+    current,
+    startTime,
+    totalSeconds,
+    name: 'يوسف البطل',
+    savedAt: Date.now()
+  };
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function clearProgress() {
+  try { localStorage.removeItem(PROGRESS_KEY); } catch(e) {}
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function checkResumeBanner() {
+  const p = loadProgress();
+  const banner = document.getElementById('resumeBanner');
+  if (!p || !p.questions || !p.questions.length) { banner.style.display = 'none'; return; }
+  const answered = Object.keys(p.answers || {}).length;
+  const total = p.questions.length;
+  const pct = Math.round((answered / total) * 100);
+  const secNames = { all: 'جميع الأقسام', geo: 'جغرافية', hist: 'تاريخ', civic: 'مواطنة' };
+  const timeAgo = Math.round((Date.now() - p.savedAt) / 60000);
+  const timeStr = timeAgo < 1 ? 'الآن' : timeAgo < 60 ? `منذ ${timeAgo} دقيقة` : `منذ ${Math.floor(timeAgo/60)} ساعة`;
+  document.getElementById('resumeDetail').textContent =
+    `${secNames[p.section] || p.section} • السؤال ${p.current + 1} من ${total} • ${answered} إجابة • ${timeStr}`;
+  banner.style.display = 'block';
+}
+
+function resumeQuiz() {
+  const p = loadProgress();
+  if (!p) return;
+  selectedSection = p.section;
+  questions = p.questions;
+  answers = p.answers || {};
+  current = p.current || 0;
+  startTime = Date.now() - ((p.totalSeconds || 0) * 1000);
+  totalSeconds = p.totalSeconds || 0;
+  document.getElementById('qTotal').textContent = questions.length;
+  startTimer();
+  showScreen('quizScreen');
+  renderQuestion();
+  document.getElementById('resumeBanner').style.display = 'none';
+}
+
+function discardProgress() {
+  clearProgress();
+  document.getElementById('resumeBanner').style.display = 'none';
+  document.querySelector('.start-btn').textContent = '▶ ابدأ الاختبار الآن';
+}
+
+// ══════════════════════════════════════════
+// SECTION SELECT
+// ══════════════════════════════════════════
+function selectSection(sec, el) {
+  document.querySelectorAll('.section-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSection = sec;
+}
+
+// ══════════════════════════════════════════
+// START
+// ══════════════════════════════════════════
+function startQuiz() {
+  clearProgress();
+  if (selectedSection === 'all') questions = [...allQuestions];
+  else questions = allQuestions.filter(q => q.sec === selectedSection);
+
+  // Shuffle
+  for (let i = questions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [questions[i], questions[j]] = [questions[j], questions[i]];
+  }
+  // Shuffle options for each question
+  questions.forEach(q => {
+    const opts = [...q.options];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    q._shuffledOptions = opts;
+  });
+
+  answers = {};
+  current = 0;
+  startTime = Date.now();
+  totalSeconds = 0;
+
+  document.getElementById('qTotal').textContent = questions.length;
+  const banner = document.getElementById('retryModeBanner');
+  if (banner) banner.style.display = 'none';
+  startTimer();
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════
+function startTimer() {
+  clearInterval(timerInterval);
+  const el = document.getElementById('timerDisplay');
+  timerInterval = setInterval(() => {
+    totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    el.classList.toggle('warning', totalSeconds > 3600);
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+}
+
+// ══════════════════════════════════════════
+// RENDER QUESTION
+// ══════════════════════════════════════════
+function renderQuestion() {
+  const q = questions[current];
+  const total = questions.length;
+  const answered = answers[current];
+
+  document.getElementById('qCurrent').textContent = current + 1;
+  document.getElementById('progressFill').style.width = `${((current) / total) * 100}%`;
+
+  const secLabels = { geo: '🌍 جغرافية', hist: '📜 تاريخ', civic: '🏛️ مواطنة' };
+  const secClasses = { geo: 'tag-geo', hist: 'tag-hist', civic: 'tag-civic' };
+  const tag = document.getElementById('qSectionTag');
+  tag.textContent = secLabels[q.sec];
+  tag.className = 'quiz-section-tag ' + secClasses[q.sec];
+
+  document.getElementById('qNumber').textContent = `سؤال ${current + 1} من ${total}`;
+  document.getElementById('qText').textContent = q.q;
+
+  const grid = document.getElementById('optionsGrid');
+  const labels = ['أ', 'ب', 'ج', 'د'];
+  grid.innerHTML = q._shuffledOptions.map((opt, i) => `
+    <button class="option-btn ${getOptionClass(opt, answered, q.correct)}"
+      onclick="selectAnswer('${escapeHtml(opt)}')"
+      ${answered ? 'disabled' : ''}>
+      <span class="option-label">${labels[i]}</span>
+      ${opt}
+    </button>
+  `).join('');
+
+  // Feedback
+  const fb = document.getElementById('feedbackBox');
+  const fbIcon = document.getElementById('feedbackIcon');
+  const fbText = document.getElementById('feedbackText');
+  if (answered) {
+    fb.classList.add('show');
+    if (answered === q.correct) {
+      fbIcon.textContent = '✅';
+      fbText.innerHTML = '<strong>إجابة صحيحة!</strong> أحسنت!';
+    } else {
+      fbIcon.textContent = '❌';
+      fbText.innerHTML = `إجابة خاطئة. الإجابة الصحيحة: <strong>${q.correct}</strong>`;
+    }
+  } else {
+    fb.classList.remove('show');
+  }
+
+  document.getElementById('prevBtn').disabled = current === 0;
+  const nextBtn = document.getElementById('nextBtn');
+  if (current === total - 1) {
+    nextBtn.textContent = '✓ إنهاء الاختبار';
+    nextBtn.disabled = !answered;
+  } else {
+    nextBtn.textContent = 'التالي ←';
+    nextBtn.disabled = !answered;
+  }
+}
+
+function getOptionClass(opt, answered, correct) {
+  if (!answered) return '';
+  if (opt === correct) return 'show-correct';
+  if (opt === answered && answered !== correct) return 'selected-wrong';
+  return '';
+}
+
+function escapeHtml(s) { return s.replace(/'/g, "\\'"); }
+
+// ══════════════════════════════════════════
+// SELECT ANSWER
+// ══════════════════════════════════════════
+function selectAnswer(opt) {
+  if (answers[current] !== undefined) return;
+  const q = questions[current];
+  answers[current] = opt;
+
+  const grid = document.getElementById('optionsGrid');
+  const btns = grid.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    const btnOpt = q._shuffledOptions[i];
+    btn.disabled = true;
+    if (btnOpt === q.correct) btn.classList.add('show-correct');
+    if (btnOpt === opt && opt !== q.correct) btn.classList.add('selected-wrong');
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedbackBox');
+  const fbIcon = document.getElementById('feedbackIcon');
+  const fbText = document.getElementById('feedbackText');
+  fb.classList.add('show');
+  if (opt === q.correct) {
+    fbIcon.textContent = '✅';
+    fbText.innerHTML = '<strong>إجابة صحيحة!</strong> ممتاز!';
+    showAhsantPopup();
+    updateBalance(isRetryMode ? 250 : 500, 'gain');
+  } else {
+    fbIcon.textContent = '❌';
+    fbText.innerHTML = `إجابة خاطئة. الجواب الصحيح: <strong>${q.correct}</strong>`;
+    showKhataPopup(q.correct);
+    updateBalance(-250, 'lose');
+  }
+
+  updateTopBarStats();
+  document.getElementById('nextBtn').disabled = false;
+  if (current === questions.length - 1) {
+    document.getElementById('nextBtn').textContent = '✓ إنهاء الاختبار';
+  }
+  saveProgress();
+}
+
+// ══════════════════════════════════════════
+// AHSANT CELEBRATION POPUP
+// ══════════════════════════════════════════
+function showAhsantPopup() {
+  // Remove any existing popup
+  const old = document.getElementById('ahsantPopup');
+  if (old) old.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'ahsantPopup';
+  popup.innerHTML = `
+    <div class="ahsant-inner">
+      <div class="ahsant-stars">⭐⭐⭐</div>
+      <div class="ahsant-text">أحسنت!</div>
+      <div class="ahsant-sub">إجابة صحيحة 🎉</div>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  // Mini confetti burst
+  const colors = ['#c9a84c','#3fb950','#a371f7','#f78166','#388bfd','#e8c97a','#fff'];
+  for (let i = 0; i < 35; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `
+        left: ${30 + Math.random() * 40}vw;
+        top: 30vh;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        animation-duration: ${1.2 + Math.random() * 1.2}s;
+        animation-delay: 0s;
+        transform: rotate(${Math.random() * 360}deg);
+        width: ${7 + Math.random() * 9}px;
+        height: ${7 + Math.random() * 9}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '3px'};
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }, i * 25);
+  }
+
+  // Auto-remove popup after 900ms
+  setTimeout(() => {
+    popup.classList.add('ahsant-hide');
+    setTimeout(() => popup.remove(), 400);
+  }, 900);
+}
+
+function showKhataPopup(correct) {
+  const old = document.getElementById('khataPopup');
+  if (old) old.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'khataPopup';
+  popup.innerHTML = `
+    <div class="khata-inner">
+      <div class="khata-icon">❌</div>
+      <div class="khata-text">خطأ!</div>
+      <div class="khata-sub">الصحيحة: ${correct}</div>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  // shake confetti (red pieces)
+  const colors = ['#f85149','#ff6b6b','#ff4444','#c0392b','#e74c3c'];
+  for (let i = 0; i < 25; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `
+        left: ${30 + Math.random() * 40}vw;
+        top: 30vh;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        animation-duration: ${1 + Math.random() * 1}s;
+        animation-delay: 0s;
+        transform: rotate(${Math.random() * 360}deg);
+        width: ${6 + Math.random() * 8}px;
+        height: ${6 + Math.random() * 8}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '3px'};
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }, i * 25);
+  }
+
+  setTimeout(() => {
+    popup.classList.add('khata-hide');
+    setTimeout(() => popup.remove(), 400);
+  }, 1100);
+}
+
+
+// ══════════════════════════════════════════
+function nextQuestion() {
+  if (current === questions.length - 1) {
+    finishQuiz();
+    return;
+  }
+  current++;
+  saveProgress();
+  renderQuestion();
+}
+
+function prevQuestion() {
+  if (current > 0) { current--; saveProgress(); renderQuestion(); }
+}
+
+function confirmQuit() {
+  if (confirm('هل أنت متأكد من الخروج؟ سيتم حفظ تقدمك لتكمل لاحقاً.')) {
+    saveProgress();
+    stopTimer();
+    goHome();
+  }
+}
+
+// ══════════════════════════════════════════
+// FINISH
+// ══════════════════════════════════════════
+async function finishQuiz() {
+  stopTimer();
+
+  const name = 'يوسف البطل';
+  let correct = 0, wrong = 0, skipped = 0;
+  let geoC = 0, geoT = 0, histC = 0, histT = 0, civicC = 0, civicT = 0;
+
+  // تفاصيل كل سؤال
+  const qaDetails = questions.map((q, i) => {
+    const ans = answers[i];
+    const isCorrect = ans === q.correct;
+    const isSkipped = ans === undefined;
+    if (q.sec === 'geo') { geoT++; if (isCorrect) geoC++; }
+    if (q.sec === 'hist') { histT++; if (isCorrect) histC++; }
+    if (q.sec === 'civic') { civicT++; if (isCorrect) civicC++; }
+    if (isSkipped) skipped++;
+    else if (isCorrect) correct++;
+    else wrong++;
+    return { id: q.id, sec: q.sec, q: q.q, correct: q.correct, userAnswer: ans || null, status: isSkipped ? 'skip' : isCorrect ? 'correct' : 'wrong' };
+  });
+
+  const pct = Math.round((correct / questions.length) * 100);
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+
+  // Grade
+  let grade, gradeClass, gradeMsg;
+  if (pct >= 90) { grade = '🏆 ممتاز'; gradeClass = 'grade-A'; gradeMsg = 'أداء رائع! أنت متميز في المادة'; }
+  else if (pct >= 75) { grade = '⭐ جيد جداً'; gradeClass = 'grade-B'; gradeMsg = 'عمل جيد! واصل الاجتهاد'; }
+  else if (pct >= 60) { grade = '✓ جيد'; gradeClass = 'grade-C'; gradeMsg = 'نتيجة مقبولة، يمكنك التحسين'; }
+  else { grade = '📖 بحاجة للمراجعة'; gradeClass = 'grade-D'; gradeMsg = 'راجع الدروس وأعد الاختبار'; }
+
+  // Update UI
+  document.getElementById('resultName').textContent = name;
+  document.getElementById('resultSub').textContent = gradeMsg;
+  document.getElementById('gradeBadge').textContent = grade;
+  document.getElementById('gradeBadge').className = 'grade-badge ' + gradeClass;
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('timeUsed').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+
+  // Ring animation
+  const ring = document.getElementById('scoreRingFill');
+  const circumference = 377;
+  const offset = circumference - (pct / 100) * circumference;
+  const ringColor = pct >= 75 ? '#3fb950' : pct >= 60 ? '#c9a84c' : '#f85149';
+  ring.style.stroke = ringColor;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+
+  // Section bars
+  const setBar = (barId, pctId, c, t) => {
+    const p = t > 0 ? Math.round((c / t) * 100) : 0;
+    document.getElementById(barId).style.width = p + '%';
+    document.getElementById(pctId).textContent = p + '%';
+  };
+  setTimeout(() => {
+    setBar('geoBar', 'geoPct', geoC, geoT);
+    setBar('histBar', 'histPct', histC, histT);
+    setBar('civicBar', 'civicPct', civicC, civicT);
+  }, 300);
+
+  document.getElementById('geoScoreRow').style.display = geoT > 0 ? 'flex' : 'none';
+  document.getElementById('histScoreRow').style.display = histT > 0 ? 'flex' : 'none';
+  document.getElementById('civicScoreRow').style.display = civicT > 0 ? 'flex' : 'none';
+
+  // عرض جميع الأسئلة
+  window._qaDetails = qaDetails;
+  renderQAList('all');
+
+  if (correct === questions.length) {
+    document.getElementById('allCorrectMsg').style.display = 'block';
+  }
+
+  // Show retry wrong button if any wrong answers
+  const retryWrongResultBtn = document.getElementById('retryWrongResultBtn');
+  if (retryWrongResultBtn) {
+    retryWrongResultBtn.style.display = wrong > 0 ? 'block' : 'none';
+    if (wrong > 0) retryWrongResultBtn.textContent = `🔁 أعِد الأسئلة الخاطئة (${wrong})`;
+  }
+
+  // Save to cloud with full details
+  const resultData = {
+    name, section: selectedSection, score: correct, wrong, skipped,
+    total: questions.length, pct, correct,
+    timeSeconds: totalSeconds,
+    timestamp: Date.now(),
+    date: new Date().toLocaleDateString('ar-IQ'),
+    qaDetails
+  };
+
+  // Save to local history for menu
+  saveToHistory({ section: selectedSection, correct, wrong, skipped, total: questions.length, pct, timeSeconds: totalSeconds, date: new Date().toLocaleDateString('ar-IQ'), qaDetails });
+
+  try {
+    const code = await window.saveResultToCloud(resultData);
+    document.getElementById('resultCodeDisplay').textContent = code;
+    showSaveToast('✓ تم الحفظ • الكود: ' + code);
+  } catch(e) {
+    document.getElementById('resultCodeDisplay').textContent = '------';
+    showSaveToast('⚠ تعذر الحفظ السحابي');
+  }
+
+  if (pct >= 80) launchConfetti();
+  // 🏆 مكافأة الإعادة الكاملة
+  if (isRetryMode && pct === 100) {
+    setTimeout(() => {
+      currentBalance += 50000;
+      updateBalanceUI();
+      saveBalance();
+      showBalancePopup(50000, 'bonus');
+      launchConfetti();
+    }, 800);
+    isRetryMode = false;
+  } else {
+    isRetryMode = false;
+  }
+  loadLeaderboard();
+  clearProgress();
+  showScreen('resultsScreen');
+}
+
+// ══════════════════════════════════════════
+// عرض قائمة الأسئلة مع الفلاتر
+// ══════════════════════════════════════════
+function renderQAList(filter) {
+  const list = document.getElementById('qaList');
+  if (!window._qaDetails) return;
+  const secName = { geo: '🌍', hist: '📜', civic: '🏛️' };
+  const items = window._qaDetails.filter(q => filter === 'all' || q.status === filter);
+  if (items.length === 0) {
+    list.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:1.5rem;font-size:0.9rem">لا توجد أسئلة في هذه الفئة</div>`;
+    return;
+  }
+  list.innerHTML = items.map((q, i) => {
+    const icon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⬜';
+    const detailsHTML = q.status === 'correct'
+      ? `<div class="qa-your-ans correct">إجابتك: ${q.userAnswer} ✓</div>`
+      : q.status === 'wrong'
+      ? `<div class="qa-your-ans">إجابتك: ${q.userAnswer}</div>
+         <div class="qa-correct-ans">الصحيحة: ${q.correct}</div>`
+      : `<div class="qa-skipped-note">لم تُجب على هذا السؤال</div>
+         <div class="qa-correct-ans">الإجابة الصحيحة: ${q.correct}</div>`;
+    return `
+      <div class="qa-item qa-${q.status}" onclick="this.classList.toggle('open')">
+        <div class="qa-item-header">
+          <span class="qa-num">${secName[q.sec]} ${q.id}</span>
+          <span class="qa-q-text">${q.q}</span>
+          <span class="qa-status-icon">${icon}</span>
+        </div>
+        <div class="qa-details">${detailsHTML}</div>
+      </div>`;
+  }).join('');
+}
+
+function filterQA(filter, btn) {
+  document.querySelectorAll('.qa-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderQAList(filter);
+}
+
+// ══════════════════════════════════════════
+// نسخ الكود
+// ══════════════════════════════════════════
+function copyResultCode() {
+  const code = document.getElementById('resultCodeDisplay').textContent;
+  if (code === '------') return;
+  navigator.clipboard.writeText(code).then(() => {
+    showSaveToast('✓ تم نسخ الكود: ' + code);
+  }).catch(() => {
+    showSaveToast('الكود: ' + code);
+  });
+}
+
+// ══════════════════════════════════════════
+// البحث بالكود
+// ══════════════════════════════════════════
+async function lookupResult() {
+  const code = document.getElementById('lookupCodeInput').value.trim().toUpperCase();
+  if (code.length < 4) { showSaveToast('⚠ أدخل كوداً صحيحاً'); return; }
+  const el = document.getElementById('lookupResult');
+  el.innerHTML = `<div style="color:var(--text-muted);padding:1rem">⏳ جاري البحث...</div>`;
+  try {
+    const r = await window.getResultByCode(code);
+    if (!r) {
+      el.innerHTML = `<div style="color:var(--red);padding:1rem">❌ لم يُعثر على نتيجة بهذا الكود</div>`;
+      return;
+    }
+    const secName = { geo: '🌍', hist: '📜', civic: '🏛️' };
+    const qRows = r.qaDetails ? r.qaDetails.map(q => {
+      const icon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⬜';
+      const detail = q.status === 'wrong'
+        ? `<div style="color:var(--red);font-size:0.78rem">إجابة الطالب: ${q.userAnswer}</div><div style="color:var(--green);font-size:0.78rem">الصحيحة: ${q.correct}</div>`
+        : q.status === 'skip'
+        ? `<div style="color:var(--text-muted);font-size:0.78rem">لم يُجب • الصحيحة: ${q.correct}</div>` : '';
+      return `<div class="qa-item qa-${q.status}" onclick="this.classList.toggle('open')" style="margin-bottom:0.5rem">
+        <div class="qa-item-header">
+          <span class="qa-num">${secName[q.sec]||''} ${q.id}</span>
+          <span class="qa-q-text" style="font-size:0.85rem">${q.q}</span>
+          <span class="qa-status-icon">${icon}</span>
+        </div>
+        ${detail ? `<div class="qa-details" style="display:block">${detail}</div>` : ''}
+      </div>`;
+    }).join('') : '';
+
+    el.innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--gold-dark);border-radius:16px;padding:1.2rem;margin-bottom:1rem;text-align:right">
+        <div style="font-size:1.3rem;font-weight:900;color:var(--gold);margin-bottom:0.3rem">${r.pct}% — ${r.name}</div>
+        <div style="font-size:0.85rem;color:var(--text-muted)">${r.score}/${r.total} صحيح &nbsp;•&nbsp; ${r.wrong||0} خاطئ &nbsp;•&nbsp; ${r.skipped||0} لم يُجب</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">${r.date || ''}</div>
+      </div>
+      <div class="qa-list">${qRows}</div>`;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--red);padding:1rem">⚠ حدث خطأ أثناء البحث</div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+// LEADERBOARD
+// ══════════════════════════════════════════
+async function loadLeaderboard() {
+  const lb = document.getElementById('leaderboardList');
+  try {
+    const results = await window.getTopResults();
+    if (!results || results.length === 0) {
+      lb.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem">لا توجد نتائج محفوظة بعد</div>';
+      return;
+    }
+    const sorted = results.sort((a, b) => b.pct - a.pct).slice(0, 10);
+    const secName = { all: 'الكل', geo: 'جغرافية', hist: 'تاريخ', civic: 'مواطنة' };
+    lb.innerHTML = sorted.map((r, i) => `
+      <div class="lb-item">
+        <div class="lb-rank ${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other'}">${i + 1}</div>
+        <div class="lb-name">
+          ${r.name || 'طالب'}
+          <div class="lb-section">${secName[r.section] || r.section} · ${r.date || ''}</div>
+        </div>
+        <div class="lb-score">${r.pct}%</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    lb.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem">تعذر تحميل النتائج</div>';
+  }
+}
+
+// ══════════════════════════════════════════
+// CONFETTI
+// ══════════════════════════════════════════
+function launchConfetti() {
+  const colors = ['#c9a84c','#3fb950','#a371f7','#f78166','#388bfd','#e8c97a'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `
+        left: ${Math.random() * 100}vw;
+        top: -20px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        animation-duration: ${2 + Math.random() * 2}s;
+        animation-delay: ${Math.random() * 0.5}s;
+        transform: rotate(${Math.random() * 360}deg);
+        width: ${6 + Math.random() * 8}px;
+        height: ${6 + Math.random() * 8}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 40);
+  }
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function showSaveToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'save-overlay';
+  toast.innerHTML = `<div class="spinner"></div> ${msg}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3200);
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════
+// BALANCE SYSTEM (Firebase-synced)
+// ══════════════════════════════════════════
+const BALANCE_KEY = 'quizBalance_v1';
+let currentBalance = 0;
+let sessionCorrect = 0;
+let sessionWrong = 0;
+let isRetryMode = false;
+
+async function loadBalance() {
+  // Try Firebase first using the already-loaded Firebase module
+  try {
+    if (window.firebaseReady && window._firebaseDb) {
+      const { ref, get } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const snap = await get(ref(window._firebaseDb, 'balance/yousuf'));
+      if (snap.exists()) {
+        const d = snap.val();
+        currentBalance = d.balance || 0;
+        sessionCorrect = d.sessionCorrect || 0;
+        sessionWrong = d.sessionWrong || 0;
+        updateBalanceUI();
+        return;
+      }
+    }
+  } catch(e) {}
+  // Fallback: localStorage
+  try {
+    const d = JSON.parse(localStorage.getItem(BALANCE_KEY) || '{}');
+    currentBalance = d.balance || 0;
+    sessionCorrect = d.sessionCorrect || 0;
+    sessionWrong = d.sessionWrong || 0;
+  } catch(e) { currentBalance = 0; sessionCorrect = 0; sessionWrong = 0; }
+  updateBalanceUI();
+}
+
+async function saveBalance() {
+  const data = { balance: currentBalance, sessionCorrect, sessionWrong, updatedAt: Date.now() };
+  try { localStorage.setItem(BALANCE_KEY, JSON.stringify(data)); } catch(e) {}
+  try {
+    if (window.firebaseReady && window._firebaseDb) {
+      const { ref, set } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      await set(ref(window._firebaseDb, 'balance/yousuf'), data);
+    }
+  } catch(e) {}
+}
+
+function updateBalanceUI() {
+  const fmt = n => n.toLocaleString('ar-IQ') + ' د';
+  const el = document.getElementById('balanceDisplay');
+  const el2 = document.getElementById('overlayBalance');
+  if (el) el.textContent = fmt(currentBalance);
+  if (el2) el2.innerHTML = currentBalance.toLocaleString('ar-IQ') + ' <span>دينار</span>';
+  updateTopBarStats();
+}
+
+function updateBalance(delta, type) {
+  currentBalance += delta;
+  if (delta > 0) sessionCorrect++;
+  else sessionWrong++;
+
+  // Flash balance card
+  const el = document.getElementById('balanceDisplay');
+  if (el) {
+    el.classList.remove('gaining','losing');
+    void el.offsetWidth;
+    el.classList.add(delta > 0 ? 'gaining' : 'losing');
+    setTimeout(() => el.classList.remove('gaining','losing'), 800);
+  }
+
+  updateBalanceUI();
+  showBalancePopup(delta, type);
+  saveBalance();
+}
+
+function showBalancePopup(delta, type) {
+  const old = document.getElementById('balancePopupEl');
+  if (old) old.remove();
+  const pop = document.createElement('div');
+  pop.id = 'balancePopupEl';
+  pop.className = `balance-popup ${type}`;
+  if (type === 'gain') {
+    const amt = delta === 250 ? 250 : 500;
+    pop.innerHTML = `✅ أحسنت صح! <strong>تم إضافة +${amt} دينار</strong> 💰`;
+  } else if (type === 'lose') {
+    pop.innerHTML = `❌ خطأ! <strong>خُصم 250 دينار</strong>`;
+  } else {
+    pop.innerHTML = `🏆 مكافأة 100%! <strong>+50,000 دينار</strong> 🎉`;
+  }
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 2000);
+}
+
+function updateTopBarStats() {
+  const total = sessionCorrect + sessionWrong;
+  const pctC = total > 0 ? Math.round((sessionCorrect / total) * 100) : 0;
+  const pctW = total > 0 ? Math.round((sessionWrong / total) * 100) : 0;
+
+  const el1 = document.getElementById('topBarCorrect');
+  const el2 = document.getElementById('topBarWrong');
+  const ovC = document.getElementById('ovCorrect');
+  const ovW = document.getElementById('ovWrong');
+  const ovPC = document.getElementById('ovPctCorrect');
+  const ovPW = document.getElementById('ovPctWrong');
+  const retryBtn = document.getElementById('retryWrongOverlayBtn');
+  const retryCount = document.getElementById('retryWrongCount');
+
+  if (el1) el1.textContent = `✅ ${sessionCorrect} صح`;
+  if (el2) el2.textContent = `❌ ${sessionWrong} خطأ`;
+  if (ovC) ovC.textContent = sessionCorrect;
+  if (ovW) ovW.textContent = sessionWrong;
+  if (ovPC) ovPC.textContent = pctC + '%';
+  if (ovPW) ovPW.textContent = pctW + '%';
+
+  // Wrong questions for retry
+  const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  const wrongQs = hist.length ? (hist[0].qaDetails||[]).filter(q => q.status === 'wrong') : [];
+  if (retryCount) retryCount.textContent = wrongQs.length;
+  if (retryBtn) retryBtn.disabled = wrongQs.length === 0;
+
+  // Quick retry bar
+  const quickBar = document.getElementById('retryQuickBar');
+  const quickCount = document.getElementById('retryQuickCount');
+  if (quickBar) {
+    if (wrongQs.length > 0) {
+      quickBar.classList.add('visible');
+    } else {
+      quickBar.classList.remove('visible');
+    }
+  }
+  if (quickCount) quickCount.textContent = wrongQs.length;
+}
+
+// ══════════════════════════════════════════
+// STATS PANEL
+// ══════════════════════════════════════════
+function openStatsPanel() {
+  updateTopBarStats();
+  updateBalanceUI();
+  document.getElementById('statsOverlay').classList.add('open');
+  document.getElementById('statsOverlayBg').classList.add('open');
+  document.getElementById('statsArrow').style.transform = 'rotate(180deg)';
+}
+
+function closeStatsPanel() {
+  document.getElementById('statsOverlay').classList.remove('open');
+  document.getElementById('statsOverlayBg').classList.remove('open');
+  document.getElementById('statsArrow').style.transform = '';
+}
+
+function retryWrongFromOverlay() {
+  closeStatsPanel();
+  retryWrongQs();
+}
+
+// ══════════════════════════════════════════
+// RETRY WRONG — reward 250 per correct; 50k bonus if 100%
+// ══════════════════════════════════════════
+function startQuizWithWrong_enhanced(wrongQTexts) {
+  isRetryMode = true;
+  const matched = allQuestions.filter(q => wrongQTexts.includes(q.q));
+  if (!matched.length) { alert('لم يتم العثور على الأسئلة الخاطئة'); return; }
+  clearProgress();
+  questions = [...matched];
+  for (let i = questions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [questions[i], questions[j]] = [questions[j], questions[i]];
+  }
+  questions.forEach(q => {
+    const opts = [...q.options];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    q._shuffledOptions = opts;
+  });
+  answers = {};
+  current = 0;
+  startTime = Date.now();
+  totalSeconds = 0;
+  document.getElementById('qTotal').textContent = questions.length;
+  const banner = document.getElementById('retryModeBanner');
+  if (banner) banner.style.display = 'block';
+  startTimer();
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+// Override retryWrongQs to use enhanced version
+function retryWrongQs() {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (!hist.length) return;
+    const wrongQs = (hist[0].qaDetails||[]).filter(q => q.status === 'wrong').map(q => q.q);
+    if (!wrongQs.length) return;
+    localStorage.setItem('retryWrongQuestions', JSON.stringify(wrongQs));
+    closeMenu();
+    startQuizWithWrong_enhanced(wrongQs);
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+// Init on DOM ready
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  checkResumeBanner();
+  loadBalance();
+});
+
+function restartQuiz() { isRetryMode = false; startQuiz(); }
+function goHome() { stopTimer(); isRetryMode = false; showScreen('homeScreen'); checkResumeBanner(); }
+
+</script>
+</body>
+</html>
